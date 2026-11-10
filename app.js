@@ -128,7 +128,7 @@ function onPacket(header, body) {
   const kind = header >> 4
   if (kind === 2) {
     if (body.length < 2 || body[1] !== 0) {
-      setConnection(false, 'The chat server refused the connection. Retrying…'')
+      setConnection(false, 'The chat server refused the connection. Retrying…')
       socket?.close()
       return
     }
