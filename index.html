@@ -3,49 +3,122 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="theme-color" content="#101116" />
-    <meta name="description" content="Bunny RTC is one shared live chat room for everyone." />
-    <title>Bunny RTC — One shared chat</title>
+    <meta name="theme-color" content="#12141c" />
+    <meta name="description" content="Bunny RTC — one shared live chat room." />
+    <title>Bunny RTC</title>
     <link rel="stylesheet" href="./styles.css" />
   </head>
   <body>
-    <main class="app-shell">
+    <main class="app">
       <header class="topbar">
-        <a class="brand" href="./" aria-label="Bunny RTC home"><span class="brand-icon">B</span><span>Bunny RTC</span></a>
-        <div class="room-label"><span class="room-live-dot"></span><span>ONE SHARED ROOM</span></div>
-        <button id="invite-button" class="invite-button" type="button"><span aria-hidden="true">↗</span> Invite friends</button>
+        <a class="brand" href="./" aria-label="Bunny RTC">
+          <span class="brand-mark" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M12 3c-1.5 2.5-4 4-4 7.5a4 4 0 0 0 8 0c0-3.5-2.5-5-4-7.5z"/>
+              <path d="M8.5 14.5c.8 1.8 2 2.5 3.5 2.5s2.7-.7 3.5-2.5"/>
+              <circle cx="9.5" cy="11" r="0.8" fill="currentColor" stroke="none"/>
+              <circle cx="14.5" cy="11" r="0.8" fill="currentColor" stroke="none"/>
+            </svg>
+          </span>
+          <span class="brand-text">Bunny RTC</span>
+        </a>
+
+        <div class="status-pill">
+          <span class="live-dot" aria-hidden="true"></span>
+          <span id="header-online-count">Connecting…</span>
+        </div>
+
+        <button id="invite-button" class="ghost-btn" type="button" title="Copy invite link">
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/>
+            <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/>
+          </svg>
+          <span>Invite</span>
+        </button>
       </header>
 
-      <section class="chat-panel" aria-label="Bunny RTC shared chat">
-        <div class="chat-heading">
-          <div class="heading-icon" aria-hidden="true">✳</div>
-          <div class="heading-copy"><h1>Bunny RTC</h1><p>Everyone on this site is in the same chat.</p></div>
-          <div class="online-pill"><span class="room-live-dot"></span><span id="header-online-count">Connecting…</span></div>
+      <section class="chat-card" aria-label="Shared chat">
+        <div class="chat-header">
+          <div class="chat-title">
+            <h1>Shared Room</h1>
+            <p>Everyone who visits is here</p>
+          </div>
+          <div class="connection-banner" id="connection-banner" role="status" data-state="connecting">
+            <span class="conn-dot"></span>
+            <span id="connection-label">Connecting…</span>
+            <button id="reconnect-button" type="button" hidden>Reconnect</button>
+          </div>
         </div>
-        <div class="connection-banner" id="connection-banner" role="status">
-          <span class="connection-indicator"></span>
-          <span id="connection-label">Connecting to the shared room…</span>
-          <button id="reconnect-button" type="button" hidden>Reconnect</button>
-        </div>
+
         <div id="message-list" class="message-list" aria-live="polite" aria-label="Messages"></div>
-        <form id="message-form" class="composer">
-          <button id="emoji-button" class="emoji-button" type="button" aria-label="Add a wave emoji" title="Add a wave">☺</button>
-          <label class="sr-only" for="message-input">Message everyone</label>
-          <input id="message-input" maxlength="500" autocomplete="off" placeholder="Connect to join the chat…" disabled />
-          <button class="send-button" type="submit" aria-label="Send message" disabled>↑</button>
-        </form>
-        <div class="bottom-row"><div class="user-card"><div id="self-avatar" class="avatar">?</div><div class="user-copy"><strong id="self-name">Guest</strong><small>in the shared room</small></div><button id="name-button" class="icon-button" type="button" title="Change display name" aria-label="Change display name">✎</button></div><p class="composer-hint">Enter to send <span>·</span> Keep personal information private</p></div>
+
+        <div class="composer-wrap">
+          <form id="message-form" class="composer">
+            <button id="emoji-button" class="icon-btn" type="button" aria-label="Open emoji picker" title="Emoji">
+              <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="9"/>
+                <path d="M8.5 14.5s1.5 2 3.5 2 3.5-2 3.5-2"/>
+                <circle cx="9" cy="10" r="1" fill="currentColor" stroke="none"/>
+                <circle cx="15" cy="10" r="1" fill="currentColor" stroke="none"/>
+              </svg>
+            </button>
+
+            <label class="sr-only" for="message-input">Message</label>
+            <input id="message-input" maxlength="500" autocomplete="off" placeholder="Connect to chat…" disabled />
+
+            <button class="send-btn" type="submit" aria-label="Send" disabled>
+              <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M5 12h14"/>
+                <path d="M12 5l7 7-7 7"/>
+              </svg>
+            </button>
+          </form>
+
+          <div id="emoji-picker" class="emoji-picker" hidden>
+            <div class="emoji-grid" id="emoji-grid"></div>
+          </div>
+        </div>
+
+        <div class="bottom-bar">
+          <div class="user-chip">
+            <div id="self-avatar" class="avatar">?</div>
+            <div class="user-meta">
+              <strong id="self-name">Guest</strong>
+              <span>you</span>
+            </div>
+            <button id="name-button" class="icon-btn tiny" type="button" title="Change name" aria-label="Change display name">
+              <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M12 20h9"/>
+                <path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4 12.5-12.5z"/>
+              </svg>
+            </button>
+          </div>
+          <p class="hint">Enter to send · keep personal info private</p>
+        </div>
       </section>
-      <footer class="page-foot">One public room for everyone who visits Bunny RTC.</footer>
+
+      <footer class="foot">One public room · powered by a free MQTT broker</footer>
     </main>
 
     <dialog id="name-dialog" class="name-dialog">
       <form id="name-form" method="dialog">
-        <div class="dialog-mark">B</div><h2>Pick your chat name</h2><p>This name appears next to your messages.</p>
-        <label for="name-input">DISPLAY NAME</label><input id="name-input" maxlength="24" minlength="2" autocomplete="nickname" required />
-        <div class="dialog-actions"><button id="cancel-name" class="cancel-button" type="button">Cancel</button><button class="save-button" type="submit">Save name</button></div>
+        <div class="dialog-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 3c-1.5 2.5-4 4-4 7.5a4 4 0 0 0 8 0c0-3.5-2.5-5-4-7.5z"/>
+            <path d="M8.5 14.5c.8 1.8 2 2.5 3.5 2.5s2.7-.7 3.5-2.5"/>
+          </svg>
+        </div>
+        <h2>Display name</h2>
+        <p>This name shows next to your messages.</p>
+        <label for="name-input">Name</label>
+        <input id="name-input" maxlength="24" minlength="2" autocomplete="nickname" required />
+        <div class="dialog-actions">
+          <button id="cancel-name" class="ghost-btn" type="button">Cancel</button>
+          <button class="primary-btn" type="submit">Save</button>
+        </div>
       </form>
     </dialog>
-    <script src="./app.js?v=20261110fix" defer></script>
+
+    <script src="./app.js?v=20261110-neo" defer></script>
   </body>
 </html>
