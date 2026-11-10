@@ -56,26 +56,24 @@ const EMOJIS = [
   '🉐','🈹','🈚','🈲','🉑','🈸','🈴','🈳','㊗️','㊙️','🈺','🈵','🔴','🟠','🟡','🟢',
   '🔵','🟣','🟤','⚫','⚪','🟥','🟧','🟨','🟩','🟦','🟪','🟫','⬛','⬜','◼️','◻️',
   '◾','◽','▪️','▫️','🔶','🔷','🔸','🔹','🔺','🔻','💠','🔘','🔳','🔲','🏁','🚩',
-  '🎌','🏴','🏳️','🏳️‍🌈','🏳️‍⚧️','🏴‍☠️','🇦🇨','🇦🇩','🇦🇪','🇦🇫','🇦🇬','🇦🇮','🇦🇱','🇦🇲','🇦🇴','🇦🇶',
-  '🔥','✨','🌟','💫','⭐','🌈','☀️','🌤️','⛅','🌥️','☁️','🌦️','🌧️','⛈️','🌩️','🌨️',
-  '❄️','☃️','⛄','🌬️','💨','🌪️','🌫️','🌊','💧','💦','☔','☂️','⚡','☄️','💥','💢',
-  '🎉','🎊','🎈','🎁','🎀','🎄','🎃','🎗️','🎟️','🎫','🎖️','🏆','🏅','🥇','🥈','🥉',
-  '⚽','🏀','🏈','⚾','🥎','🎾','🏐','🏉','🥏','🎱','🪀','🏓','🏸','🏒','🏑','🥍',
-  '🏏','🪃','🥅','⛳','🪁','🏹','🎣','🤿','🥊','🥋','🎽','🛹','🛼','🛷','⛸️','🥌',
-  '🎿','⛷️','🏂','🪂','🏋️','🤼','🤸','⛹️','🤺','🤾','🏌️','🏇','🧘','🏄','🏊','🤽',
-  '🚣','🧗','🚵','🚴','🏆','🥇','🎯','🎮','🕹️','🎲','🧩','♟️','🎭','🎨','🧵','🧶',
-  '🎼','🎵','🎶','🎹','🥁','🎷','🎺','🎸','🪕','🎻','🎤','🎧','📻','🎬','🎥','📽️',
-  '🎞️','📷','📸','📹','📼','🔍','🔎','🕯️','💡','🔦','🏮','🪔','📔','📕','📖','📗',
-  '📘','📙','📚','📓','📒','📃','📜','📄','📰','🗞️','📑','🔖','🏷️','💰','🪙','💴',
-  '💵','💶','💷','💸','💳','🧾','💹','✉️','📧','📨','📩','📤','📥','📦','📫','📪',
-  '📬','📭','📮','🗳️','✏️','✒️','🖋️','🖊️','🖌️','🖍️','📝','💼','📁','📂','🗂️','📅',
-  '📆','🗒️','🗓️','📇','📈','📉','📊','📋','📌','📍','📎','🖇️','📏','📐','✂️','🗃️',
-  '🗄️','🗑️','🔒','🔓','🔏','🔐','🔑','🗝️','🔨','🪓','⛏️','⚒️','🛠️','🗡️','⚔️','🔫',
-  '🪃','🏹','🛡️','🪚','🔧','🪛','🔩','⚙️','🗜️','⚖️','🦯','🔗','⛓️','🪝','🧰','🧲',
-  '🪜','⚗️','🧪','🧫','🧬','🔬','🔭','📡','💉','🩸','💊','🩹','🩺','🚪','🛗','🪞',
-  '🪟','🛏️','🛋️','🪑','🚽','🪠','🚿','🛁','🪤','🪒','🧴','🧷','🧹','🧺','🧻','🪣',
-  '🧼','🪥','🧽','🧯','🛒','🚬','⚰️','🪦','⚱️','🗿','🪧','🏧','🚮','🚰','♿','🚹',
-  '🚺','🚻','🚼','🚾','🛂','🛃','🛄','🛅'
+  '🎌','🏴','🏳️','🏳️‍🌈','🏳️‍⚧️','🏴‍☠️','🔥','✨','🌟','💫','⭐','🌈','☀️','🌤️','⛅','🌥️',
+  '☁️','🌦️','🌧️','⛈️','🌩️','🌨️','❄️','☃️','⛄','🌬️','💨','🌪️','🌫️','🌊','💧','💦',
+  '☔','☂️','⚡','☄️','💥','💢','🎉','🎊','🎈','🎁','🎀','🎄','🎃','🎗️','🎟️','🎫',
+  '🎖️','🏆','🏅','🥇','🥈','🥉','⚽','🏀','🏈','⚾','🥎','🎾','🏐','🏉','🥏','🎱',
+  '🪀','🏓','🏸','🏒','🏑','🥍','🏏','🪃','🥅','⛳','🪁','🏹','🎣','🤿','🥊','🥋',
+  '🎽','🛹','🛼','🛷','⛸️','🥌','🎿','⛷️','🏂','🪂','🏋️','🤼','🤸','⛹️','🤺','🤾',
+  '🏌️','🏇','🧘','🏄','🏊','🤽','🚣','🧗','🚵','🚴','🏆','🥇','🎯','🎮','🕹️','🎲',
+  '🧩','♟️','🎭','🎨','🧵','🧶','🎼','🎵','🎶','🎹','🥁','🎷','🎺','🎸','🪕','🎻',
+  '🎤','🎧','📻','🎬','🎥','📽️','🎞️','📷','📸','📹','📼','🔍','🔎','🕯️','💡','🔦',
+  '🏮','🪔','📔','📕','📖','📗','📘','📙','📚','📓','📒','📃','📜','📄','📰','🗞️',
+  '📑','🔖','🏷️','💰','🪙','💴','💵','💶','💷','💸','💳','🧾','💹','✉️','📧','📨',
+  '📩','📤','📥','📦','📫','📪','📬','📭','📮','🗳️','✏️','✒️','🖋️','🖊️','🖌️','🖍️',
+  '📝','💼','📁','📂','🗂️','📅','📆','🗒️','🗓️','📇','📈','📉','📊','📋','📌','📍',
+  '📎','🖇️','📏','📐','✂️','🗃️','🗄️','🗑️','🔒','🔓','🔏','🔐','🔑','🗝️','🔨','🪓',
+  '⛏️','⚒️','🛠️','🗡️','⚔️','🔫','🪃','🏹','🛡️','🪚','🔧','🪛','🔩','⚙️','🗜️','⚖️',
+  '🦯','🔗','⛓️','🪝','🧰','🧲','🪜','⚗️','🧪','🧫','🧬','🔬','🔭','📡','💉','🩸',
+  '💊','🩹','🩺','🚪','🛗','🪞','🪟','🛏️','🛋️','🪑','🚽','🪠','🚿','🛁','🪤','🪒',
+  '🧴','🧷','🧹','🧺','🧻','🪣','🧼','🪥','🧽','🧯','🛒','🚬','⚰️','🪦','⚱️','🗿','🪧'
 ]
 
 const $ = (selector) => document.querySelector(selector)
@@ -268,7 +266,7 @@ function setConnection(isConnected, message) {
   ui.onlineCount.textContent = isConnected ? `${Math.max(1, members.size)} online` : 'Connecting…'
   ui.input.disabled = !isConnected
   ui.send.disabled = !isConnected
-  ui.input.placeholder = isConnected ? 'Message everyone…' : 'Connecting…'
+  ui.input.placeholder = isConnected ? 'Message #shared-room' : 'Connecting…'
 }
 
 function openConnection() {
@@ -320,7 +318,7 @@ function cleanName(value) {
 function colorFor(value) {
   let hash = 0
   for (let i = 0; i < value.length; i++) hash = (hash * 31 + value.charCodeAt(i)) | 0
-  const colors = ['#8e78dc', '#db7392', '#4ba8b8', '#d69353', '#65a87b', '#6288cf', '#ba75c1']
+  const colors = ['#ed4245', '#faa61a', '#3ba55d', '#5865f2', '#eb459e', '#57f287', '#fee75c']
   return colors[Math.abs(hash) % colors.length]
 }
 
@@ -346,8 +344,8 @@ function renderMessages() {
         <path d="M8.5 14.5c.8 1.8 2 2.5 3.5 2.5s2.7-.7 3.5-2.5"/>
       </svg>
     </div>
-    <h2>Welcome to Bunny RTC</h2>
-    <p>Everyone who visits this site is in the same room. Say hello.</p>
+    <h2>Welcome to #shared-room</h2>
+    <p>This is the beginning of the shared room. Everyone who visits Bunny RTC is here. Say hello.</p>
   `
   ui.messageList.append(welcome)
 
@@ -425,16 +423,17 @@ function buildEmojiPicker() {
     btn.type = 'button'
     btn.className = 'emoji-item'
     btn.textContent = emoji
-    btn.addEventListener('click', () => {
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation()
       if (ui.input.disabled) return
-      const start = ui.input.selectionStart
-      const end = ui.input.selectionEnd
+      const start = ui.input.selectionStart ?? ui.input.value.length
+      const end = ui.input.selectionEnd ?? ui.input.value.length
       const val = ui.input.value
       ui.input.value = val.slice(0, start) + emoji + val.slice(end)
       ui.input.focus()
       const pos = start + emoji.length
       ui.input.setSelectionRange(pos, pos)
-      closeEmojiPicker()
+      // do NOT close the picker here
     })
     ui.emojiGrid.append(btn)
   }
@@ -482,21 +481,21 @@ ui.emoji.addEventListener('click', (e) => {
 })
 
 document.addEventListener('click', (e) => {
-  if (emojiPickerOpen && !ui.emojiPicker.contains(e.target) && e.target !== ui.emoji) {
-    closeEmojiPicker()
-  }
+  if (!emojiPickerOpen) return
+  if (ui.emojiPicker.contains(e.target) || e.target === ui.emoji || ui.emoji.contains(e.target)) return
+  closeEmojiPicker()
 })
 
 ui.invite.addEventListener('click', async () => {
   const inviteUrl = `${location.origin}${location.pathname}`
   try {
     await navigator.clipboard.writeText(inviteUrl)
-    ui.invite.querySelector('span').textContent = 'Copied'
+    ui.invite.title = 'Copied!'
   } catch {
-    ui.invite.querySelector('span').textContent = 'Copy failed'
+    ui.invite.title = 'Copy failed'
   }
   window.setTimeout(() => {
-    ui.invite.querySelector('span').textContent = 'Invite'
+    ui.invite.title = 'Copy invite link'
   }, 2000)
 })
 
