@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#17191f" />
+    <meta name="description" content="A tiny one-server chat for your friends." />
+    <title>Bunny RTC — #general</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <main class="app-shell">
+      <aside class="server-rail" aria-label="Servers">
+        <div class="server-mark" title="Bunny RTC">B</div>
+        <div class="rail-divider"></div>
+        <div class="server-mark active" title="Bunny RTC server">🐰</div>
+        <button class="add-server" type="button" aria-label="One server only" title="One server only">+</button>
+      </aside>
+
+      <aside class="channel-sidebar">
+        <header class="server-header">
+          <span class="server-name">Bunny RTC</span>
+          <span class="server-subtitle">ONE SERVER · FRIENDS</span>
+        </header>
+        <div class="channel-group-label">TEXT CHANNELS</div>
+        <button class="channel selected" type="button" aria-current="page">
+          <span class="hash">#</span><span>general</span><span class="channel-live" aria-label="Live">●</span>
+        </button>
+        <div class="sidebar-spacer"></div>
+        <section class="voice-card">
+          <div class="voice-top"><span class="voice-dot"></span><span id="connection-label">Connecting…</span></div>
+          <div id="voice-detail" class="voice-detail">Joining #general</div>
+        </section>
+        <section class="user-card">
+          <div id="self-avatar" class="avatar self-avatar">?</div>
+          <div class="user-copy"><strong id="self-name">Guest</strong><small>online</small></div>
+          <button id="name-button" class="icon-button" type="button" title="Change display name" aria-label="Change display name">✎</button>
+        </section>
+      </aside>
+
+      <section class="chat-column" aria-label="General chat">
+        <header class="channel-header">
+          <div class="channel-heading"><span class="hash big-hash">#</span><h1>general</h1></div>
+          <p>One place for everyone in the server.</p>
+          <div class="header-online"><span class="voice-dot"></span><span id="header-online-count">Connecting</span></div>
+          <button id="invite-button" class="invite-button" type="button">Invite friends</button>
+        </header>
+
+        <div id="message-list" class="message-list" aria-live="polite" aria-label="Messages">
+          <div class="welcome-block">
+            <div class="welcome-hash">#</div>
+            <h2>Welcome to #general</h2>
+            <p>This is the start of the conversation. Say hey 👋</p>
+          </div>
+        </div>
+
+        <form id="message-form" class="composer">
+          <button id="emoji-button" class="composer-icon" type="button" aria-label="Add a wave emoji" title="Add a wave">☺</button>
+          <label class="sr-only" for="message-input">Message #general</label>
+          <input id="message-input" maxlength="500" autocomplete="off" placeholder="Message #general" disabled />
+          <button class="send-button" type="submit" aria-label="Send message" disabled>↑</button>
+        </form>
+        <footer class="composer-hint">Enter to send <span>·</span> One shared server</footer>
+      </section>
+
+      <aside class="members-sidebar">
+        <h2>ONLINE — <span id="member-count">0</span></h2>
+        <div id="member-list" class="member-list"><div class="member-loading">Connecting…</div></div>
+        <div class="privacy-note">Keep personal info and passwords out of public chat.</div>
+      </aside>
+    </main>
+
+    <dialog id="name-dialog" class="name-dialog">
+      <form id="name-form" method="dialog">
+        <div class="dialog-mark">B</div>
+        <h2>What should friends call you?</h2>
+        <p>Your name shows beside messages in #general.</p>
+        <label for="name-input">DISPLAY NAME</label>
+        <input id="name-input" maxlength="24" minlength="2" autocomplete="nickname" required />
+        <div class="dialog-actions"><button id="cancel-name" class="cancel-button" type="button">Cancel</button><button class="save-button" type="submit">Save name</button></div>
+      </form>
+    </dialog>
+
+    <script src="./app.js" defer></script>
+  </body>
+</html>
