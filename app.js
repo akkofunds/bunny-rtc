@@ -1,5 +1,4 @@
 const BROKER_URL = 'wss://broker.emqx.io:8084/mqtt'
-// One permanent room: every visitor joins the same topics.
 const ROOM_ID = 'bunny-rtc-public-room-v1'
 const SERVER_TOPIC = `bunny-rtc/${ROOM_ID}`
 const CHANNEL_TOPIC = `${SERVER_TOPIC}/chat`
@@ -28,6 +27,56 @@ let stopping = false
 let historyReceived = new Map()
 let members = new Map()
 let lastRenderedDay = ''
+let emojiPickerOpen = false
+
+const EMOJIS = [
+  '😀','😃','😄','😁','😆','😅','🤣','😂','🙂','🙃','😉','😊','😇','🥰','😍','🤩',
+  '😘','😗','😚','😙','🥲','😋','😛','😜','🤪','😝','🤑','🤗','🤭','🤫','🤔','🤐',
+  '🤨','😐','😑','😶','😏','😒','🙄','😬','😮‍💨','🤥','😌','😔','😪','🤤','😴','😷',
+  '🤒','🤕','🤢','🤮','🤧','🥵','🥶','🥴','😵','🤯','🤠','🥳','🥸','😎','🤓','🧐',
+  '😕','😟','🙁','☹️','😮','😯','😲','😳','🥺','😦','😧','😨','😰','😥','😢','😭',
+  '😱','😖','😣','😞','😓','😩','😫','🥱','😤','😡','😠','🤬','😈','👿','💀','☠️',
+  '💩','🤡','👹','👺','👻','👽','👾','🤖','😺','😸','😹','😻','😼','😽','🙀','😿',
+  '😾','👋','🤚','🖐️','✋','🖖','👌','🤌','🤏','✌️','🤞','🤟','🤘','🤙','👈','👉',
+  '👆','🖕','👇','☝️','👍','👎','✊','👊','🤛','🤜','👏','🙌','👐','🤲','🤝','🙏',
+  '✍️','💅','🤳','💪','🦾','🦿','🦵','🦶','👂','🦻','👃','🧠','🫀','🫁','🦷','🦴',
+  '👀','👁️','👅','👄','💋','🩸','❤️','🧡','💛','💚','💙','💜','🖤','🤍','🤎','💔',
+  '❣️','💕','💞','💓','💗','💖','💘','💝','💟','☮️','✝️','☪️','🕉️','☸️','✡️','🔯',
+  '🕎','☯️','☦️','🛐','⛎','♈','♉','♊','♋','♌','♍','♎','♏','♐','♑','♒',
+  '♓','🆔','⚛️','🉑','☢️','☣️','📴','📳','🈶','🈚','🈸','🈺','🈷️','✴️','🆚','💮',
+  '🉐','㊙️','㊗️','🈴','🈵','🈹','🈲','🅰️','🅱️','🆎','🆑','🅾️','🆘','❌','⭕','🛑',
+  '⛔','📛','🚫','💯','💢','♨️','🚷','🚯','🚳','🚱','🔞','📵','🚭','❗','❕','❓',
+  '❔','‼️','⁉️','🔅','🔆','〽️','⚠️','🚸','🔱','⚜️','🔰','♻️','✅','🈯','💹','❇️',
+  '✳️','❎','🌐','💠','Ⓜ️','🌀','💤','🏧','🚾','♿','🅿️','🛗','🈳','🈂️','🛂','🛃',
+  '🛄','🛅','♂️','♀️','⚧️','✖️','➕','➖','➗','♾️','‼️','⁉️','❓','❔','❕','❗',
+  '〰️','💱','💲','⚕️','♻️','⚜️','🔱','📛','🔰','⭕','✅','☑️','✔️','❌','❎','➰',
+  '➿','〽','✳️','✴️','❇️','©️','®️','™️','#️⃣','*️⃣','0️⃣','1️⃣','2️⃣','3️⃣','4️⃣','5️⃣',
+  '6️⃣','7️⃣','8️⃣','9️⃣','🔟','🔠','🔡','🔢','🔣','🔤','🅰️','🆎','🅱️','🆑','🆒','🆓',
+  'ℹ️','🆔','Ⓜ️','🆕','🆖','🅾️','🆗','🅿️','🆘','🆙','🆚','🈁','🈂️','🈷️','🈶','🈯',
+  '🉐','🈹','🈚','🈲','🉑','🈸','🈴','🈳','㊗️','㊙️','🈺','🈵','🔴','🟠','🟡','🟢',
+  '🔵','🟣','🟤','⚫','⚪','🟥','🟧','🟨','🟩','🟦','🟪','🟫','⬛','⬜','◼️','◻️',
+  '◾','◽','▪️','▫️','🔶','🔷','🔸','🔹','🔺','🔻','💠','🔘','🔳','🔲','🏁','🚩',
+  '🎌','🏴','🏳️','🏳️‍🌈','🏳️‍⚧️','🏴‍☠️','🇦🇨','🇦🇩','🇦🇪','🇦🇫','🇦🇬','🇦🇮','🇦🇱','🇦🇲','🇦🇴','🇦🇶',
+  '🔥','✨','🌟','💫','⭐','🌈','☀️','🌤️','⛅','🌥️','☁️','🌦️','🌧️','⛈️','🌩️','🌨️',
+  '❄️','☃️','⛄','🌬️','💨','🌪️','🌫️','🌊','💧','💦','☔','☂️','⚡','☄️','💥','💢',
+  '🎉','🎊','🎈','🎁','🎀','🎄','🎃','🎗️','🎟️','🎫','🎖️','🏆','🏅','🥇','🥈','🥉',
+  '⚽','🏀','🏈','⚾','🥎','🎾','🏐','🏉','🥏','🎱','🪀','🏓','🏸','🏒','🏑','🥍',
+  '🏏','🪃','🥅','⛳','🪁','🏹','🎣','🤿','🥊','🥋','🎽','🛹','🛼','🛷','⛸️','🥌',
+  '🎿','⛷️','🏂','🪂','🏋️','🤼','🤸','⛹️','🤺','🤾','🏌️','🏇','🧘','🏄','🏊','🤽',
+  '🚣','🧗','🚵','🚴','🏆','🥇','🎯','🎮','🕹️','🎲','🧩','♟️','🎭','🎨','🧵','🧶',
+  '🎼','🎵','🎶','🎹','🥁','🎷','🎺','🎸','🪕','🎻','🎤','🎧','📻','🎬','🎥','📽️',
+  '🎞️','📷','📸','📹','📼','🔍','🔎','🕯️','💡','🔦','🏮','🪔','📔','📕','📖','📗',
+  '📘','📙','📚','📓','📒','📃','📜','📄','📰','🗞️','📑','🔖','🏷️','💰','🪙','💴',
+  '💵','💶','💷','💸','💳','🧾','💹','✉️','📧','📨','📩','📤','📥','📦','📫','📪',
+  '📬','📭','📮','🗳️','✏️','✒️','🖋️','🖊️','🖌️','🖍️','📝','💼','📁','📂','🗂️','📅',
+  '📆','🗒️','🗓️','📇','📈','📉','📊','📋','📌','📍','📎','🖇️','📏','📐','✂️','🗃️',
+  '🗄️','🗑️','🔒','🔓','🔏','🔐','🔑','🗝️','🔨','🪓','⛏️','⚒️','🛠️','🗡️','⚔️','🔫',
+  '🪃','🏹','🛡️','🪚','🔧','🪛','🔩','⚙️','🗜️','⚖️','🦯','🔗','⛓️','🪝','🧰','🧲',
+  '🪜','⚗️','🧪','🧫','🧬','🔬','🔭','📡','💉','🩸','💊','🩹','🩺','🚪','🛗','🪞',
+  '🪟','🛏️','🛋️','🪑','🚽','🪠','🚿','🛁','🪤','🪒','🧴','🧷','🧹','🧺','🧻','🪣',
+  '🧼','🪥','🧽','🧯','🛒','🚬','⚰️','🪦','⚱️','🗿','🪧','🏧','🚮','🚰','♿','🚹',
+  '🚺','🚻','🚼','🚾','🛂','🛃','🛄','🛅'
+]
 
 const $ = (selector) => document.querySelector(selector)
 const ui = {
@@ -37,7 +86,7 @@ const ui = {
   onlineCount: $('#header-online-count'),
   messageList: $('#message-list'),
   input: $('#message-input'),
-  send: $('.send-button'),
+  send: $('.send-btn'),
   name: $('#self-name'),
   avatar: $('#self-avatar'),
   nameButton: $('#name-button'),
@@ -47,6 +96,8 @@ const ui = {
   cancelName: $('#cancel-name'),
   form: $('#message-form'),
   emoji: $('#emoji-button'),
+  emojiPicker: $('#emoji-picker'),
+  emojiGrid: $('#emoji-grid'),
   invite: $('#invite-button')
 }
 
@@ -90,7 +141,7 @@ function connectPacket() {
   const keepAlive = KEEP_ALIVE_SECONDS
   const body = [
     ...utf8('MQTT'), 4,
-    0x26, // clean session + retained empty will (clears presence after a crash)
+    0x26,
     keepAlive >> 8, keepAlive & 0xff,
     ...utf8(clientId),
     ...utf8(willTopic),
@@ -128,13 +179,13 @@ function onPacket(header, body) {
   const kind = header >> 4
   if (kind === 2) {
     if (body.length < 2 || body[1] !== 0) {
-      setConnection(false, 'The chat server refused the connection. Retrying…')
+      setConnection(false, 'Server refused connection. Retrying…')
       socket?.close()
       return
     }
     connected = true
     window.clearTimeout(connectionTimeout)
-    setConnection(true, 'Connected — you are chatting with everyone on Bunny RTC.')
+    setConnection(true, 'Connected — chatting with everyone')
     subscribe(CHANNEL_TOPIC)
     subscribe(`${HISTORY_TOPIC}+`)
     subscribe(`${PRESENCE_TOPIC}+`)
@@ -177,7 +228,7 @@ function onMessage(payload, topic) {
     renderMessages()
     if (topic === CHANNEL_TOPIC && historyReceived.size > MAX_VISIBLE_MESSAGES) trimHistory()
   } catch {
-    // Ignore malformed broker messages.
+    // ignore
   }
 }
 
@@ -196,7 +247,7 @@ function onPresence(topic, payload) {
     try {
       const member = JSON.parse(payload)
       if (member.id === id && typeof member.name === 'string') members.set(id, { ...member, at: Date.now() })
-    } catch { /* ignore malformed presence */ }
+    } catch { /* ignore */ }
   }
   updateOnlineCount()
 }
@@ -214,17 +265,17 @@ function setConnection(isConnected, message) {
   ui.status.textContent = message
   ui.banner.dataset.state = isConnected ? 'connected' : (/could not|timed out|refused|disconnected/i.test(message) ? 'error' : 'connecting')
   ui.reconnect.hidden = isConnected
-  ui.onlineCount.textContent = isConnected ? `${Math.max(1, members.size)} here now` : 'Connecting…'
+  ui.onlineCount.textContent = isConnected ? `${Math.max(1, members.size)} online` : 'Connecting…'
   ui.input.disabled = !isConnected
   ui.send.disabled = !isConnected
-  ui.input.placeholder = isConnected ? 'Message everyone…' : 'Trying to connect to the shared room…'
+  ui.input.placeholder = isConnected ? 'Message everyone…' : 'Connecting…'
 }
 
 function openConnection() {
   if (stopping) return
   window.clearTimeout(reconnectTimer)
   window.clearTimeout(connectionTimeout)
-  setConnection(false, 'Connecting to the shared room…')
+  setConnection(false, 'Connecting…')
   if (socket) {
     socket.onclose = null
     socket.onerror = null
@@ -236,7 +287,7 @@ function openConnection() {
     socket?.send(connectPacket())
     connectionTimeout = window.setTimeout(() => {
       if (!connected) {
-        setConnection(false, 'Connection timed out. Retrying automatically…')
+        setConnection(false, 'Timed out. Retrying…')
         socket?.close()
       }
     }, 9000)
@@ -251,13 +302,13 @@ function openConnection() {
       offset = parsed.next
     }
   }
-  socket.onerror = () => setConnection(false, 'Could not reach the chat server. Retrying…')
+  socket.onerror = () => setConnection(false, 'Could not reach server. Retrying…')
   socket.onclose = () => {
     connected = false
     window.clearTimeout(connectionTimeout)
     window.clearInterval(heartbeatTimer)
     window.clearInterval(pingTimer)
-    setConnection(false, 'Disconnected. Retrying automatically…')
+    setConnection(false, 'Disconnected. Retrying…')
     if (!stopping) reconnectTimer = window.setTimeout(openConnection, 2500)
   }
 }
@@ -285,10 +336,21 @@ function renderMessages() {
   const nearBottom = ui.messageList.scrollHeight - ui.messageList.scrollTop - ui.messageList.clientHeight < 80
   const messages = [...historyReceived.values()].sort((a, b) => a.at - b.at).slice(-MAX_VISIBLE_MESSAGES)
   ui.messageList.replaceChildren()
+
   const welcome = document.createElement('div')
   welcome.className = 'welcome-block'
-  welcome.innerHTML = '<div class="welcome-icon">✳</div><h2>Welcome to Bunny RTC</h2><p>Everyone who visits this site shares this one room. Say hey 👋</p>'
+  welcome.innerHTML = `
+    <div class="welcome-icon" aria-hidden="true">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M12 3c-1.5 2.5-4 4-4 7.5a4 4 0 0 0 8 0c0-3.5-2.5-5-4-7.5z"/>
+        <path d="M8.5 14.5c.8 1.8 2 2.5 3.5 2.5s2.7-.7 3.5-2.5"/>
+      </svg>
+    </div>
+    <h2>Welcome to Bunny RTC</h2>
+    <p>Everyone who visits this site is in the same room. Say hello.</p>
+  `
   ui.messageList.append(welcome)
+
   lastRenderedDay = ''
   for (const msg of messages) {
     const day = formatDay(msg.at)
@@ -331,7 +393,7 @@ function updateOnlineCount() {
   const cutoff = Date.now() - 40000
   const active = [...members.values()].filter((member) => member.at >= cutoff)
   if (!active.some((member) => member.id === selfId)) active.push({ id: selfId, name: displayName, at: Date.now() })
-  ui.onlineCount.textContent = connected ? `${active.length} here now` : 'Connecting…'
+  ui.onlineCount.textContent = connected ? `${active.length} online` : 'Connecting…'
 }
 
 function sendMessage(value) {
@@ -356,13 +418,49 @@ function openNameDialog() {
   ui.nameInput.focus()
 }
 
+function buildEmojiPicker() {
+  ui.emojiGrid.replaceChildren()
+  for (const emoji of EMOJIS) {
+    const btn = document.createElement('button')
+    btn.type = 'button'
+    btn.className = 'emoji-item'
+    btn.textContent = emoji
+    btn.addEventListener('click', () => {
+      if (ui.input.disabled) return
+      const start = ui.input.selectionStart
+      const end = ui.input.selectionEnd
+      const val = ui.input.value
+      ui.input.value = val.slice(0, start) + emoji + val.slice(end)
+      ui.input.focus()
+      const pos = start + emoji.length
+      ui.input.setSelectionRange(pos, pos)
+      closeEmojiPicker()
+    })
+    ui.emojiGrid.append(btn)
+  }
+}
+
+function openEmojiPicker() {
+  if (ui.input.disabled) return
+  emojiPickerOpen = true
+  ui.emojiPicker.hidden = false
+}
+
+function closeEmojiPicker() {
+  emojiPickerOpen = false
+  ui.emojiPicker.hidden = true
+}
+
 ui.form.addEventListener('submit', (event) => {
   event.preventDefault()
   sendMessage(ui.input.value)
   ui.input.value = ''
+  closeEmojiPicker()
 })
+
 ui.nameButton.addEventListener('click', openNameDialog)
 ui.reconnect.addEventListener('click', openConnection)
+
 ui.nameForm.addEventListener('submit', (event) => {
   event.preventDefault()
   displayName = cleanName(ui.nameInput.value)
@@ -374,21 +472,32 @@ ui.nameForm.addEventListener('submit', (event) => {
   publish(`${PRESENCE_TOPIC}${selfId}`, { id: selfId, name: displayName, at: Date.now() }, true)
   updateOnlineCount()
 })
+
 ui.cancelName.addEventListener('click', () => ui.dialog.close())
-ui.emoji.addEventListener('click', () => {
-  if (ui.input.disabled) return
-  ui.input.value += '👋'
-  ui.input.focus()
+
+ui.emoji.addEventListener('click', (e) => {
+  e.stopPropagation()
+  if (emojiPickerOpen) closeEmojiPicker()
+  else openEmojiPicker()
 })
+
+document.addEventListener('click', (e) => {
+  if (emojiPickerOpen && !ui.emojiPicker.contains(e.target) && e.target !== ui.emoji) {
+    closeEmojiPicker()
+  }
+})
+
 ui.invite.addEventListener('click', async () => {
   const inviteUrl = `${location.origin}${location.pathname}`
   try {
     await navigator.clipboard.writeText(inviteUrl)
-    ui.invite.textContent = 'Copied ✓'
+    ui.invite.querySelector('span').textContent = 'Copied'
   } catch {
-    ui.invite.textContent = inviteUrl
+    ui.invite.querySelector('span').textContent = 'Copy failed'
   }
-  window.setTimeout(() => { ui.invite.innerHTML = '<span aria-hidden="true">↗</span> Invite friends' }, 2200)
+  window.setTimeout(() => {
+    ui.invite.querySelector('span').textContent = 'Invite'
+  }, 2000)
 })
 
 if (!displayName) {
@@ -398,6 +507,7 @@ if (!displayName) {
 ui.name.textContent = displayName
 ui.avatar.textContent = [...displayName][0].toUpperCase()
 updateOnlineCount()
+buildEmojiPicker()
 openConnection()
 
 window.addEventListener('beforeunload', () => {
