@@ -1,19 +1,19 @@
 # Bunny RTC
 
-A small, static, one-server chat app. Open Bunny RTC, then use **Invite friends** to copy the shared server link. Everyone opening that link joins the same single `#general` channel; it works on static hosting such as GitHub Pages without a separate application server.
+Bunny RTC is one shared public chat room. Everyone who visits the GitHub Pages website joins the same room automatically. There are no separate servers, room codes, or channels. Share the website address with friends.
 
 ## Run locally
 
-Serve this folder over HTTP (for example, with VS Code Live Server or `python -m http.server 8080`) and open `http://localhost:8080`. The browser's `file://` mode does not support the secure WebSocket connection.
+Serve this folder over HTTP (for example, with VS Code Live Server or `python -m http.server 8080`) and open `http://localhost:8080`. The browser’s `file://` mode does not support secure WebSocket connections.
 
 ## Publish
 
-Upload the contents of this folder to a static web host and share its URL with friends. All users of this build share one channel. To use GitHub Pages, place the files in the site's published root or a subfolder and share the resulting page URL.
+Upload the contents of this folder to a static web host. GitHub Pages works without a separate application server.
 
 ## Chat behavior
 
-- Messages are retained by the public MQTT broker so people joining later can see recent chat. The app keeps the newest 100 messages.
-- The online list uses expiring presence pings.
-- The invite link contains an unguessable room key in its URL fragment. Anyone with the invite can join; do not post passwords, personal information, or anything private.
-- Chat is not end-to-end encrypted. The public MQTT broker carries the messages and may inspect them.
-- The public broker is a best-effort free service, so availability and stored history are not guaranteed.
+- Messages are retained by the public MQTT broker so everyone can see recent chat. The app keeps the newest 100 messages.
+- The online count uses expiring presence pings and is best effort.
+- This is a public room with no sign-in. Anyone who knows the website address can read and post messages.
+- Chat is not end-to-end encrypted. Do not post passwords or personal information.
+- The free public broker is best effort, so availability and stored history are not guaranteed. If the connection drops, Bunny RTC retries and shows a reconnect button.
