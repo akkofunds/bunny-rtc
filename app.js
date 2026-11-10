@@ -1,11 +1,14 @@
 const BROKER_URL = 'wss://broker.emqx.io:8084/mqtt'
-const roomKey = getOrCreateRoomKey()
-const SERVER_TOPIC = `bunny-rtc/${roomKey}`
-const CHANNEL_TOPIC = `${SERVER_TOPIC}/general`
+// One permanent room: every visitor joins the same topics.
+const ROOM_ID = 'bunny-rtc-public-room-v1'
+const SERVER_TOPIC = `bunny-rtc/${ROOM_ID}`
+const CHANNEL_TOPIC = `${SERVER_TOPIC}/chat`
 const HISTORY_TOPIC = `${SERVER_TOPIC}/history/`
 const PRESENCE_TOPIC = `${SERVER_TOPIC}/presence/`
 const KEEP_ALIVE_SECONDS = 30
 const MAX_VISIBLE_MESSAGES = 100
+
+if (location.hash) history.replaceState(null, '', `${location.pathname}${location.search}`)
 
 const encoder = new TextEncoder()
 const decoder = new TextDecoder()
@@ -20,6 +23,7 @@ let heartbeatTimer = 0
 let pingTimer = 0
 let messageSequence = 1
 let connected = false
+let connectionTimeout = 0
 let stopping = false
 let historyReceived = new Map()
 let members = new Map()
@@ -28,10 +32,9 @@ let lastRenderedDay = ''
 const $ = (selector) => document.querySelector(selector)
 const ui = {
   status: $('#connection-label'),
-  detail: $('#voice-detail'),
+  banner: $('#connection-banner'),
+  reconnect: $('#reconnect-button'),
   onlineCount: $('#header-online-count'),
-  memberCount: $('#member-count'),
-  memberList: $('#member-list'),
   messageList: $('#message-list'),
   input: $('#message-input'),
   send: $('.send-button'),
@@ -45,15 +48,6 @@ const ui = {
   form: $('#message-form'),
   emoji: $('#emoji-button'),
   invite: $('#invite-button')
-}
-
-function getOrCreateRoomKey() {
-  const fromLink = new URLSearchParams(location.hash.slice(1)).get('server')
-  if (fromLink && /^[a-f0-9]{32}$/.test(fromLink)) return fromLink
-  const bytes = crypto.getRandomValues(new Uint8Array(16))
-  const key = [...bytes].map((value) => value.toString(16).padStart(2, '0')).join('')
-  history.replaceState(null, '', `${location.pathname}${location.search}#server=${key}`)
-  return key
 }
 
 function encodeLength(length) {
@@ -134,12 +128,13 @@ function onPacket(header, body) {
   const kind = header >> 4
   if (kind === 2) {
     if (body.length < 2 || body[1] !== 0) {
-      setConnection(false, 'Could not connect to the chat server')
+      setConnection(false, 'The chat server refused the connection. Retrying…'')
       socket?.close()
       return
     }
     connected = true
-    setConnection(true, 'Connected to #general')
+    window.clearTimeout(connectionTimeout)
+    setConnection(true, 'Connected — you are chatting with everyone on Bunny RTC.')
     subscribe(CHANNEL_TOPIC)
     subscribe(`${HISTORY_TOPIC}+`)
     subscribe(`${PRESENCE_TOPIC}+`)
@@ -203,7 +198,7 @@ function onPresence(topic, payload) {
       if (member.id === id && typeof member.name === 'string') members.set(id, { ...member, at: Date.now() })
     } catch { /* ignore malformed presence */ }
   }
-  renderMembers()
+  updateOnlineCount()
 }
 
 function sendPresence() {
@@ -211,26 +206,41 @@ function sendPresence() {
   publish(`${PRESENCE_TOPIC}${selfId}`, { id: selfId, name: displayName, at: Date.now() }, true)
   const cutoff = Date.now() - 40000
   for (const [id, member] of members) if (member.at < cutoff) members.delete(id)
-  renderMembers()
+  updateOnlineCount()
 }
 
 function setConnection(isConnected, message) {
   connected = isConnected
-  ui.status.textContent = isConnected ? 'Connected' : 'Offline'
-  ui.detail.textContent = message
-  ui.onlineCount.textContent = isConnected ? `${Math.max(1, members.size + (members.has(selfId) ? 0 : 1))} online` : 'Offline'
+  ui.status.textContent = message
+  ui.banner.dataset.state = isConnected ? 'connected' : (/could not|timed out|refused|disconnected/i.test(message) ? 'error' : 'connecting')
+  ui.reconnect.hidden = isConnected
+  ui.onlineCount.textContent = isConnected ? `${Math.max(1, members.size)} here now` : 'Connecting…'
   ui.input.disabled = !isConnected
   ui.send.disabled = !isConnected
-  if (!isConnected) ui.memberList.innerHTML = '<div class="member-loading">Waiting to reconnect…</div>'
-  else renderMembers()
+  ui.input.placeholder = isConnected ? 'Message everyone…' : 'Trying to connect to the shared room…'
 }
 
 function openConnection() {
   if (stopping) return
   window.clearTimeout(reconnectTimer)
+  window.clearTimeout(connectionTimeout)
+  setConnection(false, 'Connecting to the shared room…')
+  if (socket) {
+    socket.onclose = null
+    socket.onerror = null
+    socket.close()
+  }
   socket = new WebSocket(BROKER_URL, 'mqtt')
   socket.binaryType = 'arraybuffer'
-  socket.onopen = () => socket?.send(connectPacket())
+  socket.onopen = () => {
+    socket?.send(connectPacket())
+    connectionTimeout = window.setTimeout(() => {
+      if (!connected) {
+        setConnection(false, 'Connection timed out. Retrying automatically…')
+        socket?.close()
+      }
+    }, 9000)
+  }
   socket.onmessage = (event) => {
     const bytes = new Uint8Array(event.data)
     let offset = 0
@@ -241,12 +251,13 @@ function openConnection() {
       offset = parsed.next
     }
   }
-  socket.onerror = () => setConnection(false, 'Reconnecting…')
+  socket.onerror = () => setConnection(false, 'Could not reach the chat server. Retrying…')
   socket.onclose = () => {
     connected = false
+    window.clearTimeout(connectionTimeout)
     window.clearInterval(heartbeatTimer)
     window.clearInterval(pingTimer)
-    setConnection(false, 'Reconnecting…')
+    setConnection(false, 'Disconnected. Retrying automatically…')
     if (!stopping) reconnectTimer = window.setTimeout(openConnection, 2500)
   }
 }
@@ -276,7 +287,7 @@ function renderMessages() {
   ui.messageList.replaceChildren()
   const welcome = document.createElement('div')
   welcome.className = 'welcome-block'
-  welcome.innerHTML = '<div class="welcome-hash">#</div><h2>Welcome to #general</h2><p>This is the start of the conversation. Say hey 👋</p>'
+  welcome.innerHTML = '<div class="welcome-icon">✳</div><h2>Welcome to Bunny RTC</h2><p>Everyone who visits this site shares this one room. Say hey 👋</p>'
   ui.messageList.append(welcome)
   lastRenderedDay = ''
   for (const msg of messages) {
@@ -316,27 +327,11 @@ function renderMessages() {
   if (nearBottom) ui.messageList.scrollTop = ui.messageList.scrollHeight
 }
 
-function renderMembers() {
+function updateOnlineCount() {
   const cutoff = Date.now() - 40000
   const active = [...members.values()].filter((member) => member.at >= cutoff)
   if (!active.some((member) => member.id === selfId)) active.push({ id: selfId, name: displayName, at: Date.now() })
-  active.sort((a, b) => a.id === selfId ? -1 : b.id === selfId ? 1 : a.name.localeCompare(b.name))
-  ui.memberCount.textContent = String(active.length)
-  ui.onlineCount.textContent = connected ? `${active.length} online` : 'Offline'
-  ui.memberList.replaceChildren()
-  for (const member of active) {
-    const row = document.createElement('div')
-    row.className = 'member-row'
-    const avatar = document.createElement('div')
-    avatar.className = 'avatar'
-    avatar.style.setProperty('--avatar-color', colorFor(member.id))
-    avatar.textContent = [...cleanName(member.name)][0]?.toUpperCase() || '?'
-    const name = document.createElement('span')
-    name.className = 'member-name'
-    name.textContent = member.id === selfId ? `${cleanName(member.name)} (you)` : cleanName(member.name)
-    row.append(avatar, name)
-    ui.memberList.append(row)
-  }
+  ui.onlineCount.textContent = connected ? `${active.length} here now` : 'Connecting…'
 }
 
 function sendMessage(value) {
@@ -367,6 +362,7 @@ ui.form.addEventListener('submit', (event) => {
   ui.input.value = ''
 })
 ui.nameButton.addEventListener('click', openNameDialog)
+ui.reconnect.addEventListener('click', openConnection)
 ui.nameForm.addEventListener('submit', (event) => {
   event.preventDefault()
   displayName = cleanName(ui.nameInput.value)
@@ -376,7 +372,7 @@ ui.nameForm.addEventListener('submit', (event) => {
   ui.name.textContent = displayName
   ui.avatar.textContent = [...displayName][0].toUpperCase()
   publish(`${PRESENCE_TOPIC}${selfId}`, { id: selfId, name: displayName, at: Date.now() }, true)
-  renderMembers()
+  updateOnlineCount()
 })
 ui.cancelName.addEventListener('click', () => ui.dialog.close())
 ui.emoji.addEventListener('click', () => {
@@ -385,14 +381,14 @@ ui.emoji.addEventListener('click', () => {
   ui.input.focus()
 })
 ui.invite.addEventListener('click', async () => {
-  const inviteUrl = `${location.origin}${location.pathname}#server=${roomKey}`
+  const inviteUrl = `${location.origin}${location.pathname}`
   try {
     await navigator.clipboard.writeText(inviteUrl)
-    ui.invite.textContent = 'Invite copied ✓'
+    ui.invite.textContent = 'Copied ✓'
   } catch {
     ui.invite.textContent = inviteUrl
   }
-  window.setTimeout(() => { ui.invite.textContent = 'Invite friends' }, 2200)
+  window.setTimeout(() => { ui.invite.innerHTML = '<span aria-hidden="true">↗</span> Invite friends' }, 2200)
 })
 
 if (!displayName) {
@@ -401,12 +397,13 @@ if (!displayName) {
 }
 ui.name.textContent = displayName
 ui.avatar.textContent = [...displayName][0].toUpperCase()
-renderMembers()
+updateOnlineCount()
 openConnection()
 
 window.addEventListener('beforeunload', () => {
   stopping = true
   window.clearTimeout(reconnectTimer)
+  window.clearTimeout(connectionTimeout)
   window.clearInterval(heartbeatTimer)
   window.clearInterval(pingTimer)
   publish(`${PRESENCE_TOPIC}${selfId}`, '', true)
