@@ -41,42 +41,14 @@ const EMOJIS = [
   '👆','🖕','👇','☝️','👍','👎','✊','👊','🤛','🤜','👏','🙌','👐','🤲','🤝','🙏',
   '✍️','💅','🤳','💪','🦾','🦿','🦵','🦶','👂','🦻','👃','🧠','🫀','🫁','🦷','🦴',
   '👀','👁️','👅','👄','💋','🩸','❤️','🧡','💛','💚','💙','💜','🖤','🤍','🤎','💔',
-  '❣️','💕','💞','💓','💗','💖','💘','💝','💟','☮️','✝️','☪️','🕉️','☸️','✡️','🔯',
-  '🕎','☯️','☦️','🛐','⛎','♈','♉','♊','♋','♌','♍','♎','♏','♐','♑','♒',
-  '♓','🆔','⚛️','🉑','☢️','☣️','📴','📳','🈶','🈚','🈸','🈺','🈷️','✴️','🆚','💮',
-  '🉐','㊙️','㊗️','🈴','🈵','🈹','🈲','🅰️','🅱️','🆎','🆑','🅾️','🆘','❌','⭕','🛑',
-  '⛔','📛','🚫','💯','💢','♨️','🚷','🚯','🚳','🚱','🔞','📵','🚭','❗','❕','❓',
-  '❔','‼️','⁉️','🔅','🔆','〽️','⚠️','🚸','🔱','⚜️','🔰','♻️','✅','🈯','💹','❇️',
-  '✳️','❎','🌐','💠','Ⓜ️','🌀','💤','🏧','🚾','♿','🅿️','🛗','🈳','🈂️','🛂','🛃',
-  '🛄','🛅','♂️','♀️','⚧️','✖️','➕','➖','➗','♾️','‼️','⁉️','❓','❔','❕','❗',
-  '〰️','💱','💲','⚕️','♻️','⚜️','🔱','📛','🔰','⭕','✅','☑️','✔️','❌','❎','➰',
-  '➿','〽','✳️','✴️','❇️','©️','®️','™️','#️⃣','*️⃣','0️⃣','1️⃣','2️⃣','3️⃣','4️⃣','5️⃣',
-  '6️⃣','7️⃣','8️⃣','9️⃣','🔟','🔠','🔡','🔢','🔣','🔤','🅰️','🆎','🅱️','🆑','🆒','🆓',
-  'ℹ️','🆔','Ⓜ️','🆕','🆖','🅾️','🆗','🅿️','🆘','🆙','🆚','🈁','🈂️','🈷️','🈶','🈯',
-  '🉐','🈹','🈚','🈲','🉑','🈸','🈴','🈳','㊗️','㊙️','🈺','🈵','🔴','🟠','🟡','🟢',
-  '🔵','🟣','🟤','⚫','⚪','🟥','🟧','🟨','🟩','🟦','🟪','🟫','⬛','⬜','◼️','◻️',
-  '◾','◽','▪️','▫️','🔶','🔷','🔸','🔹','🔺','🔻','💠','🔘','🔳','🔲','🏁','🚩',
-  '🎌','🏴','🏳️','🏳️‍🌈','🏳️‍⚧️','🏴‍☠️','🔥','✨','🌟','💫','⭐','🌈','☀️','🌤️','⛅','🌥️',
-  '☁️','🌦️','🌧️','⛈️','🌩️','🌨️','❄️','☃️','⛄','🌬️','💨','🌪️','🌫️','🌊','💧','💦',
-  '☔','☂️','⚡','☄️','💥','💢','🎉','🎊','🎈','🎁','🎀','🎄','🎃','🎗️','🎟️','🎫',
-  '🎖️','🏆','🏅','🥇','🥈','🥉','⚽','🏀','🏈','⚾','🥎','🎾','🏐','🏉','🥏','🎱',
-  '🪀','🏓','🏸','🏒','🏑','🥍','🏏','🪃','🥅','⛳','🪁','🏹','🎣','🤿','🥊','🥋',
-  '🎽','🛹','🛼','🛷','⛸️','🥌','🎿','⛷️','🏂','🪂','🏋️','🤼','🤸','⛹️','🤺','🤾',
-  '🏌️','🏇','🧘','🏄','🏊','🤽','🚣','🧗','🚵','🚴','🏆','🥇','🎯','🎮','🕹️','🎲',
-  '🧩','♟️','🎭','🎨','🧵','🧶','🎼','🎵','🎶','🎹','🥁','🎷','🎺','🎸','🪕','🎻',
-  '🎤','🎧','📻','🎬','🎥','📽️','🎞️','📷','📸','📹','📼','🔍','🔎','🕯️','💡','🔦',
-  '🏮','🪔','📔','📕','📖','📗','📘','📙','📚','📓','📒','📃','📜','📄','📰','🗞️',
-  '📑','🔖','🏷️','💰','🪙','💴','💵','💶','💷','💸','💳','🧾','💹','✉️','📧','📨',
-  '📩','📤','📥','📦','📫','📪','📬','📭','📮','🗳️','✏️','✒️','🖋️','🖊️','🖌️','🖍️',
-  '📝','💼','📁','📂','🗂️','📅','📆','🗒️','🗓️','📇','📈','📉','📊','📋','📌','📍',
-  '📎','🖇️','📏','📐','✂️','🗃️','🗄️','🗑️','🔒','🔓','🔏','🔐','🔑','🗝️','🔨','🪓',
-  '⛏️','⚒️','🛠️','🗡️','⚔️','🔫','🪃','🏹','🛡️','🪚','🔧','🪛','🔩','⚙️','🗜️','⚖️',
-  '🦯','🔗','⛓️','🪝','🧰','🧲','🪜','⚗️','🧪','🧫','🧬','🔬','🔭','📡','💉','🩸',
-  '💊','🩹','🩺','🚪','🛗','🪞','🪟','🛏️','🛋️','🪑','🚽','🪠','🚿','🛁','🪤','🪒',
-  '🧴','🧷','🧹','🧺','🧻','🪣','🧼','🪥','🧽','🧯','🛒','🚬','⚰️','🪦','⚱️','🗿','🪧'
+  '❣️','💕','💞','💓','💗','💖','💘','💝','💟','🔥','✨','🌟','💫','⭐','🌈','☀️',
+  '⛅','☁️','🌧️','⛈️','❄️','☃️','💨','🌪️','🌊','💧','💦','☔','⚡','💥','🎉','🎊',
+  '🎈','🎁','🎀','🎄','🎃','🏆','🏅','🥇','🥈','🥉','⚽','🏀','🏈','⚾','🎾','🏐',
+  '🎱','🏓','🏸','🏒','⛳','🎯','🎮','🕹️','🎲','🧩','♟️','🎭','🎨','🎵','🎶','🎹',
+  '🥁','🎷','🎺','🎸','🎤','🎧','📷','📸','🎬','💡','🔒','🔓','🔑','💰','💵','💳'
 ]
 
-const $ = (selector) => document.querySelector(selector)
+const $ = s => document.querySelector(s)
 const ui = {
   status: $('#connection-label'),
   banner: $('#connection-banner'),
@@ -225,9 +197,7 @@ function onMessage(payload, topic) {
     historyReceived.set(msgTopic, msg)
     renderMessages()
     if (topic === CHANNEL_TOPIC && historyReceived.size > MAX_VISIBLE_MESSAGES) trimHistory()
-  } catch {
-    // ignore
-  }
+  } catch {}
 }
 
 function trimHistory() {
@@ -245,7 +215,7 @@ function onPresence(topic, payload) {
     try {
       const member = JSON.parse(payload)
       if (member.id === id && typeof member.name === 'string') members.set(id, { ...member, at: Date.now() })
-    } catch { /* ignore */ }
+    } catch {}
   }
   updateOnlineCount()
 }
@@ -336,9 +306,9 @@ function renderMessages() {
   ui.messageList.replaceChildren()
 
   const welcome = document.createElement('div')
-  welcome.className = 'welcome-block'
+  welcome.className = 'welcome'
   welcome.innerHTML = `
-    <div class="welcome-icon" aria-hidden="true">
+    <div class="welcome-icon">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
         <path d="M12 3c-1.5 2.5-4 4-4 7.5a4 4 0 0 0 8 0c0-3.5-2.5-5-4-7.5z"/>
         <path d="M8.5 14.5c.8 1.8 2 2.5 3.5 2.5s2.7-.7 3.5-2.5"/>
@@ -353,44 +323,52 @@ function renderMessages() {
   for (const msg of messages) {
     const day = formatDay(msg.at)
     if (day !== lastRenderedDay) {
-      const divider = document.createElement('div')
-      divider.className = 'date-divider'
-      divider.textContent = day
-      ui.messageList.append(divider)
+      const sep = document.createElement('div')
+      sep.className = 'date-sep'
+      sep.textContent = day
+      ui.messageList.append(sep)
       lastRenderedDay = day
     }
-    const article = document.createElement('article')
-    article.className = 'message'
+
+    const article = document.createElement('div')
+    article.className = 'msg'
+
     const avatar = document.createElement('div')
     avatar.className = 'avatar'
     avatar.style.setProperty('--avatar-color', colorFor(msg.id))
     avatar.textContent = [...msg.name][0]?.toUpperCase() || '?'
+
     const body = document.createElement('div')
-    body.className = 'message-body'
+    body.className = 'msg-body'
+
     const meta = document.createElement('div')
-    meta.className = 'message-meta'
+    meta.className = 'msg-meta'
+
     const name = document.createElement('span')
-    name.className = 'message-name'
+    name.className = 'msg-name'
     name.textContent = msg.name
-    const time = document.createElement('time')
-    time.className = 'message-time'
-    time.dateTime = new Date(msg.at).toISOString()
+
+    const time = document.createElement('span')
+    time.className = 'msg-time'
     time.textContent = formatTime(msg.at)
-    const text = document.createElement('p')
-    text.className = 'message-text'
+
+    const text = document.createElement('div')
+    text.className = 'msg-text'
     text.textContent = msg.text
+
     meta.append(name, time)
     body.append(meta, text)
     article.append(avatar, body)
     ui.messageList.append(article)
   }
+
   if (nearBottom) ui.messageList.scrollTop = ui.messageList.scrollHeight
 }
 
 function updateOnlineCount() {
   const cutoff = Date.now() - 40000
-  const active = [...members.values()].filter((member) => member.at >= cutoff)
-  if (!active.some((member) => member.id === selfId)) active.push({ id: selfId, name: displayName, at: Date.now() })
+  const active = [...members.values()].filter(m => m.at >= cutoff)
+  if (!active.some(m => m.id === selfId)) active.push({ id: selfId, name: displayName, at: Date.now() })
   ui.onlineCount.textContent = connected ? `${active.length} online` : 'Connecting…'
 }
 
@@ -428,12 +406,11 @@ function buildEmojiPicker() {
       if (ui.input.disabled) return
       const start = ui.input.selectionStart ?? ui.input.value.length
       const end = ui.input.selectionEnd ?? ui.input.value.length
-      const val = ui.input.value
-      ui.input.value = val.slice(0, start) + emoji + val.slice(end)
+      ui.input.value = ui.input.value.slice(0, start) + emoji + ui.input.value.slice(end)
       ui.input.focus()
       const pos = start + emoji.length
       ui.input.setSelectionRange(pos, pos)
-      // do NOT close the picker here
+      // stays open
     })
     ui.emojiGrid.append(btn)
   }
@@ -450,8 +427,8 @@ function closeEmojiPicker() {
   ui.emojiPicker.hidden = true
 }
 
-ui.form.addEventListener('submit', (event) => {
-  event.preventDefault()
+ui.form.addEventListener('submit', e => {
+  e.preventDefault()
   sendMessage(ui.input.value)
   ui.input.value = ''
   closeEmojiPicker()
@@ -460,8 +437,8 @@ ui.form.addEventListener('submit', (event) => {
 ui.nameButton.addEventListener('click', openNameDialog)
 ui.reconnect.addEventListener('click', openConnection)
 
-ui.nameForm.addEventListener('submit', (event) => {
-  event.preventDefault()
+ui.nameForm.addEventListener('submit', e => {
+  e.preventDefault()
   displayName = cleanName(ui.nameInput.value)
   if (displayName.length < 2) return
   localStorage.setItem('bunny_rtc_name', displayName)
@@ -474,29 +451,26 @@ ui.nameForm.addEventListener('submit', (event) => {
 
 ui.cancelName.addEventListener('click', () => ui.dialog.close())
 
-ui.emoji.addEventListener('click', (e) => {
+ui.emoji.addEventListener('click', e => {
   e.stopPropagation()
   if (emojiPickerOpen) closeEmojiPicker()
   else openEmojiPicker()
 })
 
-document.addEventListener('click', (e) => {
+document.addEventListener('click', e => {
   if (!emojiPickerOpen) return
-  if (ui.emojiPicker.contains(e.target) || e.target === ui.emoji || ui.emoji.contains(e.target)) return
+  if (ui.emojiPicker.contains(e.target) || ui.emoji.contains(e.target)) return
   closeEmojiPicker()
 })
 
 ui.invite.addEventListener('click', async () => {
-  const inviteUrl = `${location.origin}${location.pathname}`
   try {
-    await navigator.clipboard.writeText(inviteUrl)
+    await navigator.clipboard.writeText(location.href)
     ui.invite.title = 'Copied!'
   } catch {
     ui.invite.title = 'Copy failed'
   }
-  window.setTimeout(() => {
-    ui.invite.title = 'Copy invite link'
-  }, 2000)
+  setTimeout(() => ui.invite.title = 'Copy invite link', 2000)
 })
 
 if (!displayName) {
@@ -511,10 +485,10 @@ openConnection()
 
 window.addEventListener('beforeunload', () => {
   stopping = true
-  window.clearTimeout(reconnectTimer)
-  window.clearTimeout(connectionTimeout)
-  window.clearInterval(heartbeatTimer)
-  window.clearInterval(pingTimer)
+  clearTimeout(reconnectTimer)
+  clearTimeout(connectionTimeout)
+  clearInterval(heartbeatTimer)
+  clearInterval(pingTimer)
   publish(`${PRESENCE_TOPIC}${selfId}`, '', true)
   sendPacket(0xe0, [])
   socket?.close()
