@@ -71,6 +71,47 @@ const ui = {
   invite: $('#invite-button')
 }
 
+/* ===== Background wallpaper support ===== */
+function setupBackground() {
+  const bg = $('#bg')
+  const video = $('#bg-video')
+  const candidates = ['home.mp4', 'home.jpg', 'home.png', 'home.jpeg', 'home.webp']
+
+  // Try video first
+  const tryVideo = () => {
+    video.src = 'home.mp4'
+    video.onloadeddata = () => {
+      video.hidden = false
+      bg.style.backgroundImage = 'none'
+    }
+    video.onerror = () => {
+      video.hidden = true
+      tryImage()
+    }
+  }
+
+  const tryImage = () => {
+    const img = new Image()
+    let i = 1 // skip mp4
+    const next = () => {
+      if (i >= candidates.length) return
+      const src = candidates[i++]
+      img.onload = () => {
+        bg.style.backgroundImage = `url(${src})`
+      }
+      img.onerror = next
+      img.src = src
+    }
+    next()
+  }
+
+  // Check if home.mp4 exists by attempting load
+  tryVideo()
+}
+
+setupBackground()
+
+/* ===== MQTT helpers (same as before) ===== */
 function encodeLength(length) {
   const bytes = []
   do {
@@ -81,52 +122,39 @@ function encodeLength(length) {
   } while (length > 0)
   return bytes
 }
-
 function utf8(value) {
   const bytes = [...encoder.encode(value)]
   return [bytes.length >> 8, bytes.length & 0xff, ...bytes]
 }
-
 function packet(header, body) {
   return new Uint8Array([header, ...encodeLength(body.length), ...body])
 }
-
 function sendPacket(header, body) {
   if (socket?.readyState === WebSocket.OPEN) socket.send(packet(header, body))
 }
-
 function publish(topic, value, retained = false) {
   const data = typeof value === 'string' ? encoder.encode(value) : encoder.encode(JSON.stringify(value))
   sendPacket(0x30 | (retained ? 1 : 0), [...utf8(topic), ...data])
 }
-
 function subscribe(topic) {
   const id = messageSequence++ & 0xffff
   sendPacket(0x82, [id >> 8, id & 0xff, ...utf8(topic), 0])
 }
-
 function connectPacket() {
   const willTopic = `${PRESENCE_TOPIC}${selfId}`
   const clientId = `bunny-rtc-${selfId}`
   const keepAlive = KEEP_ALIVE_SECONDS
   const body = [
-    ...utf8('MQTT'), 4,
-    0x26,
+    ...utf8('MQTT'), 4, 0x26,
     keepAlive >> 8, keepAlive & 0xff,
-    ...utf8(clientId),
-    ...utf8(willTopic),
-    ...utf8('')
+    ...utf8(clientId), ...utf8(willTopic), ...utf8('')
   ]
   return packet(0x10, body)
 }
-
 function packetAt(bytes, offset) {
   if (offset + 2 > bytes.length) return null
   const header = bytes[offset]
-  let multiplier = 1
-  let remaining = 0
-  let index = offset + 1
-  let digit
+  let multiplier = 1, remaining = 0, index = offset + 1, digit
   do {
     if (index >= bytes.length) return null
     digit = bytes[index++]
@@ -136,7 +164,6 @@ function packetAt(bytes, offset) {
   if (index + remaining > bytes.length) return null
   return { header, body: bytes.subarray(index, index + remaining), next: index + remaining }
 }
-
 function readString(bytes, offset) {
   if (offset + 2 > bytes.length) return null
   const length = (bytes[offset] << 8) | bytes[offset + 1]
@@ -149,19 +176,19 @@ function onPacket(header, body) {
   const kind = header >> 4
   if (kind === 2) {
     if (body.length < 2 || body[1] !== 0) {
-      setConnection(false, 'Server refused connection. Retrying…')
+      setConnection(false, 'Server refused. Retrying…')
       socket?.close()
       return
     }
     connected = true
-    window.clearTimeout(connectionTimeout)
-    setConnection(true, 'Connected — chatting with everyone')
+    clearTimeout(connectionTimeout)
+    setConnection(true, 'Connected')
     subscribe(CHANNEL_TOPIC)
     subscribe(`${HISTORY_TOPIC}+`)
     subscribe(`${PRESENCE_TOPIC}+`)
     publish(`${PRESENCE_TOPIC}${selfId}`, { id: selfId, name: displayName, at: Date.now() }, true)
-    heartbeatTimer = window.setInterval(sendPresence, 15000)
-    pingTimer = window.setInterval(() => sendPacket(0xc0, []), KEEP_ALIVE_SECONDS * 500)
+    heartbeatTimer = setInterval(sendPresence, 15000)
+    pingTimer = setInterval(() => sendPacket(0xc0, []), KEEP_ALIVE_SECONDS * 500)
     return
   }
   if (kind !== 3) return
@@ -169,14 +196,10 @@ function onPacket(header, body) {
   const topicField = readString(body, 0)
   if (!topicField) return
   let cursor = topicField.next
-  let packetId
-  if (qos > 0) {
-    packetId = (body[cursor] << 8) | body[cursor + 1]
-    cursor += 2
-  }
+  if (qos > 0) cursor += 2
   const topic = topicField.value
   const payload = decoder.decode(body.subarray(cursor))
-  if (qos === 1) sendPacket(0x40, [packetId >> 8, packetId & 0xff])
+  if (qos === 1) sendPacket(0x40, [(body[topicField.next] << 8) | body[topicField.next + 1]])
   if (topic === CHANNEL_TOPIC || topic.startsWith(HISTORY_TOPIC)) onMessage(payload, topic)
   else if (topic.startsWith(PRESENCE_TOPIC)) onPresence(topic, payload)
 }
@@ -236,13 +259,13 @@ function setConnection(isConnected, message) {
   ui.onlineCount.textContent = isConnected ? `${Math.max(1, members.size)} online` : 'Connecting…'
   ui.input.disabled = !isConnected
   ui.send.disabled = !isConnected
-  ui.input.placeholder = isConnected ? 'Message #shared-room' : 'Connecting…'
+  ui.input.placeholder = isConnected ? 'Message everyone…' : 'Connecting…'
 }
 
 function openConnection() {
   if (stopping) return
-  window.clearTimeout(reconnectTimer)
-  window.clearTimeout(connectionTimeout)
+  clearTimeout(reconnectTimer)
+  clearTimeout(connectionTimeout)
   setConnection(false, 'Connecting…')
   if (socket) {
     socket.onclose = null
@@ -253,7 +276,7 @@ function openConnection() {
   socket.binaryType = 'arraybuffer'
   socket.onopen = () => {
     socket?.send(connectPacket())
-    connectionTimeout = window.setTimeout(() => {
+    connectionTimeout = setTimeout(() => {
       if (!connected) {
         setConnection(false, 'Timed out. Retrying…')
         socket?.close()
@@ -273,11 +296,11 @@ function openConnection() {
   socket.onerror = () => setConnection(false, 'Could not reach server. Retrying…')
   socket.onclose = () => {
     connected = false
-    window.clearTimeout(connectionTimeout)
-    window.clearInterval(heartbeatTimer)
-    window.clearInterval(pingTimer)
+    clearTimeout(connectionTimeout)
+    clearInterval(heartbeatTimer)
+    clearInterval(pingTimer)
     setConnection(false, 'Disconnected. Retrying…')
-    if (!stopping) reconnectTimer = window.setTimeout(openConnection, 2500)
+    if (!stopping) reconnectTimer = setTimeout(openConnection, 2500)
   }
 }
 
@@ -292,12 +315,11 @@ function colorFor(value) {
   return colors[Math.abs(hash) % colors.length]
 }
 
-function formatTime(timestamp) {
-  return new Intl.DateTimeFormat(undefined, { hour: 'numeric', minute: '2-digit' }).format(new Date(timestamp))
+function formatTime(ts) {
+  return new Intl.DateTimeFormat(undefined, { hour: 'numeric', minute: '2-digit' }).format(new Date(ts))
 }
-
-function formatDay(timestamp) {
-  return new Intl.DateTimeFormat(undefined, { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' }).format(new Date(timestamp))
+function formatDay(ts) {
+  return new Intl.DateTimeFormat(undefined, { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' }).format(new Date(ts))
 }
 
 function renderMessages() {
@@ -314,8 +336,8 @@ function renderMessages() {
         <path d="M8.5 14.5c.8 1.8 2 2.5 3.5 2.5s2.7-.7 3.5-2.5"/>
       </svg>
     </div>
-    <h2>Welcome to #shared-room</h2>
-    <p>This is the beginning of the shared room. Everyone who visits Bunny RTC is here. Say hello.</p>
+    <h2>Welcome to Bunny RTC</h2>
+    <p>Everyone who visits this site shares this one room. Say hello.</p>
   `
   ui.messageList.append(welcome)
 
@@ -330,13 +352,13 @@ function renderMessages() {
       lastRenderedDay = day
     }
 
-    const article = document.createElement('div')
-    article.className = 'msg'
+    const el = document.createElement('div')
+    el.className = 'msg'
 
-    const avatar = document.createElement('div')
-    avatar.className = 'avatar'
-    avatar.style.setProperty('--avatar-color', colorFor(msg.id))
-    avatar.textContent = [...msg.name][0]?.toUpperCase() || '?'
+    const av = document.createElement('div')
+    av.className = 'avatar'
+    av.style.setProperty('--avatar-color', colorFor(msg.id))
+    av.textContent = [...msg.name][0]?.toUpperCase() || '?'
 
     const body = document.createElement('div')
     body.className = 'msg-body'
@@ -358,8 +380,8 @@ function renderMessages() {
 
     meta.append(name, time)
     body.append(meta, text)
-    article.append(avatar, body)
-    ui.messageList.append(article)
+    el.append(av, body)
+    ui.messageList.append(el)
   }
 
   if (nearBottom) ui.messageList.scrollTop = ui.messageList.scrollHeight
@@ -410,7 +432,7 @@ function buildEmojiPicker() {
       ui.input.focus()
       const pos = start + emoji.length
       ui.input.setSelectionRange(pos, pos)
-      // stays open
+      // stays open on purpose
     })
     ui.emojiGrid.append(btn)
   }
