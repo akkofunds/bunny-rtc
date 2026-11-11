@@ -1,4 +1,4 @@
-<!doctype html>
+=<!doctype html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
@@ -14,7 +14,6 @@
   <div class="bg-overlay"></div>
 
   <div class="app">
-    <!-- Top bar - sharp -->
     <header class="top liquid-glass">
       <div class="brand">
         <div class="logo">
@@ -42,7 +41,6 @@
       </div>
     </header>
 
-    <!-- Main chat - sharp full panel -->
     <section class="panel liquid-glass">
       <div class="panel-head">
         <div>
@@ -82,14 +80,15 @@
             <div class="emoji-grid" id="emoji-grid"></div>
           </div>
         </div>
+
         <div class="user-bar">
           <div class="user">
-            <div id="self-avatar" class="avatar sm">?</div>
+            <div id="self-avatar" class="avatar sm"></div>
             <div class="user-info">
               <strong id="self-name">Guest</strong>
               <span>you</span>
             </div>
-            <button id="name-button" class="icon-btn sm" type="button" title="Change name">
+            <button id="name-button" class="icon-btn sm" type="button" title="Change name / avatar">
               <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
                 <path d="M12 20h9"/>
                 <path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4 12.5-12.5z"/>
@@ -102,12 +101,26 @@
     </section>
   </div>
 
+  <!-- Name + Avatar dialog -->
   <dialog id="name-dialog" class="liquid-glass">
     <form id="name-form" method="dialog">
-      <h2>Display name</h2>
-      <p>This name shows next to your messages.</p>
-      <label for="name-input">Name</label>
+      <h2>Profile</h2>
+      <p>Name and avatar shown next to your messages.</p>
+
+      <div class="avatar-upload">
+        <div id="preview-avatar" class="avatar preview"></div>
+        <div class="upload-actions">
+          <label class="upload-btn">
+            Upload image
+            <input type="file" id="avatar-input" accept="image/*" hidden />
+          </label>
+          <button type="button" id="reset-avatar" class="reset-btn">Reset to bunny</button>
+        </div>
+      </div>
+
+      <label for="name-input">Display name</label>
       <input id="name-input" maxlength="24" minlength="2" autocomplete="nickname" required />
+
       <div class="dialog-actions">
         <button id="cancel-name" type="button">Cancel</button>
         <button type="submit">Save</button>
@@ -116,6 +129,6 @@
   </dialog>
 
   <script src="./liquid-glass.js"></script>
-  <script src="./app.js?v=liquid7" defer></script>
+  <script src="./app.js?v=final1" defer></script>
 </body>
 </html>
