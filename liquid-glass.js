@@ -1,4 +1,3 @@
-// Lightweight - only injects the filter definition, no continuous rendering
 (function () {
   if (document.getElementById('liquid-glass-svg')) return;
   const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
@@ -10,7 +9,7 @@
     <defs>
       <filter id="liquid-refraction" x="-10%" y="-10%" width="120%" height="120%">
         <feTurbulence type="fractalNoise" baseFrequency="0.01 0.015" numOctaves="2" seed="3" result="noise"/>
-        <feDisplacementMap in="SourceGraphic" in2="noise" scale="8" xChannelSelector="R" yChannelSelector="G"/>
+        <feDisplacementMap in="SourceGraphic" in2="noise" scale="6" xChannelSelector="R" yChannelSelector="G"/>
       </filter>
     </defs>
   `;
