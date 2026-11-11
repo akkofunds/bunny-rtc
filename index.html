@@ -3,19 +3,16 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <meta name="theme-color" content="#0a0a12" />
   <title>Bunny RTC</title>
   <link rel="stylesheet" href="./styles.css" />
 </head>
 <body>
-  <!-- Wallpaper layer -->
   <div class="bg" id="bg">
     <video id="bg-video" autoplay muted loop playsinline hidden></video>
   </div>
   <div class="bg-overlay"></div>
 
   <div class="app">
-    <!-- Top bar -->
     <header class="top glass">
       <div class="brand">
         <div class="logo">
@@ -28,7 +25,6 @@
         </div>
         <span>Bunny RTC</span>
       </div>
-
       <div class="top-right">
         <div class="online">
           <span class="dot"></span>
@@ -44,7 +40,6 @@
       </div>
     </header>
 
-    <!-- Main chat panel -->
     <section class="panel glass">
       <div class="panel-head">
         <div>
@@ -79,13 +74,11 @@
               </svg>
             </button>
           </form>
-
           <div id="emoji-picker" class="emoji-picker glass" hidden>
             <div class="emoji-title">Emoji</div>
             <div class="emoji-grid" id="emoji-grid"></div>
           </div>
         </div>
-
         <div class="user-bar">
           <div class="user">
             <div id="self-avatar" class="avatar sm">?</div>
@@ -119,6 +112,6 @@
     </form>
   </dialog>
 
-  <script src="./app.js?v=liquid3" defer></script>
+  <script src="./app.js?v=liquid5" defer></script>
 </body>
 </html>
