@@ -1,7 +1,7 @@
 :root {
-  --text: #f0f0f2;
-  --muted: rgba(255,255,255,0.62);
-  --faint: rgba(255,255,255,0.38);
+  --text: #f4f4f6;
+  --muted: rgba(255,255,255,0.68);
+  --faint: rgba(255,255,255,0.42);
   --accent: #8b7cf7;
   --green: #4ade80;
 }
@@ -26,7 +26,6 @@ button, input {
 }
 button { cursor: pointer; }
 
-/* Background */
 .bg {
   position: fixed;
   inset: 0;
@@ -42,11 +41,10 @@ button { cursor: pointer; }
   position: fixed;
   inset: 0;
   z-index: 1;
-  background: rgba(0,0,0,0.22);
+  background: rgba(0,0,0,0.12);
   pointer-events: none;
 }
 
-/* FULL SCREEN - no max-width, no rounded main containers */
 .app {
   position: relative;
   z-index: 2;
@@ -55,14 +53,10 @@ button { cursor: pointer; }
   width: 100%;
   display: flex;
   flex-direction: column;
-  padding: 0;          /* edge to edge */
-  gap: 0;
 }
 
-/* Top bar - sharp corners */
 .top {
   height: 52px;
-  border-radius: 0;    /* sharp */
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -103,7 +97,7 @@ button { cursor: pointer; }
   color: var(--muted);
   padding: 5px 10px;
   border-radius: 999px;
-  background: rgba(0,0,0,0.3);
+  background: rgba(0,0,0,0.25);
 }
 .dot {
   width: 7px;
@@ -120,7 +114,7 @@ button { cursor: pointer; }
   height: 30px;
   padding: 0 12px;
   border-radius: 8px;
-  background: rgba(255,255,255,0.08);
+  background: rgba(255,255,255,0.07);
   border: 1px solid rgba(255,255,255,0.1);
   font-size: 12px;
   font-weight: 500;
@@ -128,11 +122,9 @@ button { cursor: pointer; }
 }
 .ghost:hover { background: rgba(255,255,255,0.14); }
 
-/* Main panel - sharp, fills rest of screen */
 .panel {
   flex: 1;
   min-height: 0;
-  border-radius: 0;    /* sharp - no curved corners */
   display: flex;
   flex-direction: column;
   overflow: hidden;
@@ -166,7 +158,7 @@ button { cursor: pointer; }
   color: var(--muted);
   padding: 4px 10px;
   border-radius: 999px;
-  background: rgba(0,0,0,0.3);
+  background: rgba(0,0,0,0.28);
 }
 .status-dot {
   width: 6px;
@@ -200,7 +192,7 @@ button { cursor: pointer; }
   width: 44px;
   height: 44px;
   border-radius: 10px;
-  background: rgba(255,255,255,0.09);
+  background: rgba(255,255,255,0.08);
   display: grid;
   place-items: center;
   color: #c4b5fd;
@@ -241,28 +233,37 @@ button { cursor: pointer; }
 .msg {
   display: flex;
   gap: 12px;
-  padding: 5px 2px;
+  padding: 6px 2px;
   border-radius: 6px;
 }
 .msg:hover { background: rgba(255,255,255,0.04); }
 
 .avatar {
-  width: 36px;
-  height: 36px;
-  border-radius: 10px;
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  background: var(--avatar-color, #5865f2);
   display: grid;
   place-items: center;
-  font-size: 14px;
-  font-weight: 600;
-  color: #fff;
-  flex-shrink: 0;
-  background: var(--avatar-color, #8b7cf7);
+  overflow: hidden;
+  border: 1px solid rgba(255,255,255,0.12);
+  position: relative;
+}
+.avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
 .avatar.sm {
   width: 28px;
   height: 28px;
-  font-size: 12px;
-  border-radius: 50%;
+}
+.avatar .bunny-icon {
+  width: 60%;
+  height: 60%;
+  color: white;
+  opacity: 0.95;
 }
 
 .msg-body { min-width: 0; flex: 1; }
@@ -277,7 +278,7 @@ button { cursor: pointer; }
 .msg-text {
   font-size: 15px;
   line-height: 1.45;
-  color: rgba(255,255,255,0.92);
+  color: rgba(255,255,255,0.93);
   white-space: pre-wrap;
   overflow-wrap: anywhere;
 }
@@ -296,7 +297,7 @@ button { cursor: pointer; }
   min-height: 48px;
   padding: 0 8px 0 6px;
   border-radius: 10px;
-  background: rgba(0,0,0,0.35);
+  background: rgba(0,0,0,0.28);
   border: 1px solid rgba(255,255,255,0.1);
 }
 .composer:focus-within {
@@ -404,21 +405,62 @@ button { cursor: pointer; }
 .user-info span { font-size: 11px; color: var(--faint); }
 .hint { font-size: 11px; color: var(--faint); }
 
+/* Dialog */
 #name-dialog {
-  width: min(360px, calc(100vw - 32px));
+  width: min(380px, calc(100vw - 32px));
   border: none;
-  border-radius: 12px;
+  border-radius: 14px;
   padding: 0;
   color: var(--text);
   box-shadow: 0 24px 60px rgba(0,0,0,0.55);
 }
 #name-dialog::backdrop {
   background: rgba(0,0,0,0.7);
-  backdrop-filter: blur(8px);
+  backdrop-filter: blur(10px);
 }
 #name-dialog form { padding: 24px; }
 #name-dialog h2 { font-size: 18px; margin-bottom: 4px; }
-#name-dialog p { font-size: 13px; color: var(--muted); margin-bottom: 16px; }
+#name-dialog p { font-size: 13px; color: var(--muted); margin-bottom: 18px; }
+
+.avatar-upload {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 18px;
+}
+.avatar.preview {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+}
+.upload-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.upload-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 34px;
+  padding: 0 14px;
+  border-radius: 8px;
+  background: rgba(255,255,255,0.1);
+  border: 1px solid rgba(255,255,255,0.15);
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: 0.15s;
+}
+.upload-btn:hover { background: rgba(255,255,255,0.16); }
+.reset-btn {
+  font-size: 12px;
+  color: var(--muted);
+  text-align: left;
+  padding: 0;
+}
+.reset-btn:hover { color: #fff; }
+
 #name-dialog label {
   display: block;
   font-size: 11px;
@@ -433,16 +475,17 @@ button { cursor: pointer; }
   height: 42px;
   padding: 0 12px;
   border-radius: 8px;
-  background: rgba(0,0,0,0.35);
+  background: rgba(0,0,0,0.3);
   border: 1px solid rgba(255,255,255,0.12);
   font-size: 14px;
 }
 #name-dialog input:focus { border-color: var(--accent); }
+
 .dialog-actions {
   display: flex;
   justify-content: flex-end;
   gap: 8px;
-  margin-top: 18px;
+  margin-top: 20px;
 }
 .dialog-actions button {
   height: 36px;
