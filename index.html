@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Bunny RTC</title>
   <link rel="stylesheet" href="./styles.css" />
+  <link rel="stylesheet" href="./liquid-glass.css" />
 </head>
 <body>
   <div class="bg" id="bg">
@@ -13,7 +14,7 @@
   <div class="bg-overlay"></div>
 
   <div class="app">
-    <header class="top glass">
+    <header class="top liquid-glass">
       <div class="brand">
         <div class="logo">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
@@ -40,7 +41,7 @@
       </div>
     </header>
 
-    <section class="panel glass">
+    <section class="panel liquid-glass">
       <div class="panel-head">
         <div>
           <h1>Shared Room</h1>
@@ -74,7 +75,7 @@
               </svg>
             </button>
           </form>
-          <div id="emoji-picker" class="emoji-picker glass" hidden>
+          <div id="emoji-picker" class="emoji-picker liquid-glass" hidden>
             <div class="emoji-title">Emoji</div>
             <div class="emoji-grid" id="emoji-grid"></div>
           </div>
@@ -99,7 +100,7 @@
     </section>
   </div>
 
-  <dialog id="name-dialog" class="glass">
+  <dialog id="name-dialog" class="liquid-glass">
     <form id="name-form" method="dialog">
       <h2>Display name</h2>
       <p>This name shows next to your messages.</p>
@@ -112,6 +113,7 @@
     </form>
   </dialog>
 
-  <script src="./app.js?v=liquid5" defer></script>
+  <script src="./liquid-glass.js"></script>
+  <script src="./app.js?v=liquid6" defer></script>
 </body>
 </html>
