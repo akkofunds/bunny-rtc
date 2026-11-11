@@ -16,6 +16,7 @@ const selfId = storedId || crypto.randomUUID().replaceAll('-', '').slice(0, 16)
 localStorage.setItem('bunny_rtc_id', selfId)
 
 let displayName = localStorage.getItem('bunny_rtc_name') || ''
+let selfAvatar = localStorage.getItem('bunny_rtc_avatar') || null // base64 or null
 let socket = null
 let reconnectTimer = 0
 let heartbeatTimer = 0
@@ -28,6 +29,7 @@ let historyReceived = new Map()
 let members = new Map()
 let lastRenderedDay = ''
 let emojiPickerOpen = false
+let pendingAvatar = selfAvatar // for the dialog preview
 
 const EMOJIS = [
   '😀','😃','😄','😁','😆','😅','🤣','😂','🙂','🙃','😉','😊','😇','🥰','😍','🤩',
@@ -39,14 +41,11 @@ const EMOJIS = [
   '💩','🤡','👹','👺','👻','👽','👾','🤖','😺','😸','😹','😻','😼','😽','🙀','😿',
   '😾','👋','🤚','🖐️','✋','🖖','👌','🤌','🤏','✌️','🤞','🤟','🤘','🤙','👈','👉',
   '👆','🖕','👇','☝️','👍','👎','✊','👊','🤛','🤜','👏','🙌','👐','🤲','🤝','🙏',
-  '✍️','💅','🤳','💪','🦾','🦿','🦵','🦶','👂','🦻','👃','🧠','🫀','🫁','🦷','🦴',
-  '👀','👁️','👅','👄','💋','🩸','❤️','🧡','💛','💚','💙','💜','🖤','🤍','🤎','💔',
-  '❣️','💕','💞','💓','💗','💖','💘','💝','💟','🔥','✨','🌟','💫','⭐','🌈','☀️',
-  '⛅','☁️','🌧️','⛈️','❄️','☃️','💨','🌪️','🌊','💧','💦','☔','⚡','💥','🎉','🎊',
-  '🎈','🎁','🎀','🎄','🎃','🏆','🏅','🥇','🥈','🥉','⚽','🏀','🏈','⚾','🎾','🏐',
-  '🎱','🏓','🏸','🏒','⛳','🎯','🎮','🕹️','🎲','🧩','♟️','🎭','🎨','🎵','🎶','🎹',
-  '🥁','🎷','🎺','🎸','🎤','🎧','📷','📸','🎬','💡','🔒','🔓','🔑','💰','💵','💳'
+  '💪','🔥','✨','🌟','💫','⭐','❤️','🧡','💛','💚','💙','💜','🖤','🤍','🤎','💔',
+  '💯','💢','💥','💫','💦','💨','🕳️','💣','💬','👁️‍🗨️','🗨️','🗯️','💭','💤','🎉','🎊'
 ]
+
+const BUNNY_SVG = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="bunny-icon"><path d="M12 3c-1.5 2.5-4 4-4 7.5a4 4 0 0 0 8 0c0-3.5-2.5-5-4-7.5z"/><path d="M8.5 14.5c.8 1.8 2 2.5 3.5 2.5s2.7-.7 3.5-2.5"/><circle cx="9.5" cy="11" r="0.8" fill="currentColor" stroke="none"/><circle cx="14.5" cy="11" r="0.8" fill="currentColor" stroke="none"/></svg>`
 
 const $ = s => document.querySelector(s)
 const ui = {
@@ -68,50 +67,53 @@ const ui = {
   emoji: $('#emoji-button'),
   emojiPicker: $('#emoji-picker'),
   emojiGrid: $('#emoji-grid'),
-  invite: $('#invite-button')
+  invite: $('#invite-button'),
+  previewAvatar: $('#preview-avatar'),
+  avatarInput: $('#avatar-input'),
+  resetAvatar: $('#reset-avatar')
 }
 
-/* ===== Background wallpaper support ===== */
+function colorFor(id) {
+  let hash = 0
+  for (let i = 0; i < id.length; i++) hash = (hash * 31 + id.charCodeAt(i)) | 0
+  const colors = ['#ed4245','#faa61a','#3ba55d','#5865f2','#eb459e','#57f287','#fee75c','#9b59b6','#1abc9c','#e67e22']
+  return colors[Math.abs(hash) % colors.length]
+}
+
+function renderAvatar(el, id, avatarData) {
+  el.innerHTML = ''
+  el.style.setProperty('--avatar-color', colorFor(id))
+  if (avatarData) {
+    const img = document.createElement('img')
+    img.src = avatarData
+    img.alt = ''
+    el.append(img)
+  } else {
+    el.innerHTML = BUNNY_SVG
+  }
+}
+
 function setupBackground() {
   const bg = $('#bg')
   const video = $('#bg-video')
-  const candidates = ['home.mp4', 'home.jpg', 'home.png', 'home.jpeg', 'home.webp']
-
-  // Try video first
-  const tryVideo = () => {
-    video.src = 'home.mp4'
-    video.onloadeddata = () => {
-      video.hidden = false
-      bg.style.backgroundImage = 'none'
-    }
-    video.onerror = () => {
-      video.hidden = true
-      tryImage()
-    }
+  video.src = 'home.mp4'
+  video.onloadeddata = () => {
+    video.hidden = false
+    bg.style.backgroundImage = 'none'
   }
-
-  const tryImage = () => {
+  video.onerror = () => {
+    video.hidden = true
     const img = new Image()
-    let i = 1 // skip mp4
-    const next = () => {
-      if (i >= candidates.length) return
-      const src = candidates[i++]
-      img.onload = () => {
-        bg.style.backgroundImage = `url(${src})`
-      }
-      img.onerror = next
-      img.src = src
+    img.onload = () => { bg.style.backgroundImage = `url(home.jpg)` }
+    img.onerror = () => {
+      img.onload = () => { bg.style.backgroundImage = `url(home.png)` }
+      img.src = 'home.png'
     }
-    next()
+    img.src = 'home.jpg'
   }
-
-  // Check if home.mp4 exists by attempting load
-  tryVideo()
 }
-
 setupBackground()
 
-/* ===== MQTT helpers (same as before) ===== */
 function encodeLength(length) {
   const bytes = []
   do {
@@ -186,7 +188,7 @@ function onPacket(header, body) {
     subscribe(CHANNEL_TOPIC)
     subscribe(`${HISTORY_TOPIC}+`)
     subscribe(`${PRESENCE_TOPIC}+`)
-    publish(`${PRESENCE_TOPIC}${selfId}`, { id: selfId, name: displayName, at: Date.now() }, true)
+    publishPresence()
     heartbeatTimer = setInterval(sendPresence, 15000)
     pingTimer = setInterval(() => sendPacket(0xc0, []), KEEP_ALIVE_SECONDS * 500)
     return
@@ -237,15 +239,26 @@ function onPresence(topic, payload) {
   else {
     try {
       const member = JSON.parse(payload)
-      if (member.id === id && typeof member.name === 'string') members.set(id, { ...member, at: Date.now() })
+      if (member.id === id && typeof member.name === 'string') {
+        members.set(id, { ...member, at: Date.now() })
+      }
     } catch {}
   }
   updateOnlineCount()
 }
 
+function publishPresence() {
+  publish(`${PRESENCE_TOPIC}${selfId}`, {
+    id: selfId,
+    name: displayName,
+    avatar: selfAvatar,
+    at: Date.now()
+  }, true)
+}
+
 function sendPresence() {
   if (!connected) return
-  publish(`${PRESENCE_TOPIC}${selfId}`, { id: selfId, name: displayName, at: Date.now() }, true)
+  publishPresence()
   const cutoff = Date.now() - 40000
   for (const [id, member] of members) if (member.at < cutoff) members.delete(id)
   updateOnlineCount()
@@ -308,13 +321,6 @@ function cleanName(value) {
   return String(value || 'Guest').replace(/[\u0000-\u001f\u007f]/g, '').trim().slice(0, 24) || 'Guest'
 }
 
-function colorFor(value) {
-  let hash = 0
-  for (let i = 0; i < value.length; i++) hash = (hash * 31 + value.charCodeAt(i)) | 0
-  const colors = ['#ed4245', '#faa61a', '#3ba55d', '#5865f2', '#eb459e', '#57f287', '#fee75c']
-  return colors[Math.abs(hash) % colors.length]
-}
-
 function formatTime(ts) {
   return new Intl.DateTimeFormat(undefined, { hour: 'numeric', minute: '2-digit' }).format(new Date(ts))
 }
@@ -357,8 +363,9 @@ function renderMessages() {
 
     const av = document.createElement('div')
     av.className = 'avatar'
-    av.style.setProperty('--avatar-color', colorFor(msg.id))
-    av.textContent = [...msg.name][0]?.toUpperCase() || '?'
+    // Try to get avatar from presence if available
+    const member = members.get(msg.id)
+    renderAvatar(av, msg.id, member?.avatar || null)
 
     const body = document.createElement('div')
     body.className = 'msg-body'
@@ -411,9 +418,96 @@ function sendMessage(value) {
 
 function openNameDialog() {
   ui.nameInput.value = displayName
+  pendingAvatar = selfAvatar
+  renderAvatar(ui.previewAvatar, selfId, pendingAvatar)
   ui.cancelName.hidden = !displayName
   ui.dialog.showModal()
   ui.nameInput.focus()
+}
+
+function resizeAndToBase64(file) {
+  return new Promise((resolve) => {
+    const img = new Image()
+    const url = URL.createObjectURL(file)
+    img.onload = () => {
+      const canvas = document.createElement('canvas')
+      const size = 128
+      canvas.width = size
+      canvas.height = size
+      const ctx = canvas.getContext('2d')
+      // cover crop
+      const scale = Math.max(size / img.width, size / img.height)
+      const w = img.width * scale
+      const h = img.height * scale
+      const x = (size - w) / 2
+      const y = (size - h) / 2
+      ctx.drawImage(img, x, y, w, h)
+      URL.revokeObjectURL(url)
+      resolve(canvas.toDataURL('image/jpeg', 0.7))
+    }
+    img.src = url
+  })
+}
+
+ui.avatarInput.addEventListener('change', async (e) => {
+  const file = e.target.files?.[0]
+  if (!file) return
+  pendingAvatar = await resizeAndToBase64(file)
+  renderAvatar(ui.previewAvatar, selfId, pendingAvatar)
+})
+
+ui.resetAvatar.addEventListener('click', () => {
+  pendingAvatar = null
+  renderAvatar(ui.previewAvatar, selfId, null)
+})
+
+ui.form.addEventListener('submit', e => {
+  e.preventDefault()
+  sendMessage(ui.input.value)
+  ui.input.value = ''
+  closeEmojiPicker()
+})
+
+ui.nameButton.addEventListener('click', openNameDialog)
+ui.reconnect.addEventListener('click', openConnection)
+
+ui.nameForm.addEventListener('submit', e => {
+  e.preventDefault()
+  displayName = cleanName(ui.nameInput.value)
+  if (displayName.length < 2) return
+  selfAvatar = pendingAvatar
+  localStorage.setItem('bunny_rtc_name', displayName)
+  if (selfAvatar) localStorage.setItem('bunny_rtc_avatar', selfAvatar)
+  else localStorage.removeItem('bunny_rtc_avatar')
+  ui.dialog.close()
+  ui.name.textContent = displayName
+  renderAvatar(ui.avatar, selfId, selfAvatar)
+  publishPresence()
+  updateOnlineCount()
+})
+
+ui.cancelName.addEventListener('click', () => ui.dialog.close())
+
+ui.emoji.addEventListener('click', e => {
+  e.stopPropagation()
+  if (emojiPickerOpen) closeEmojiPicker()
+  else openEmojiPicker()
+})
+
+document.addEventListener('click', e => {
+  if (!emojiPickerOpen) return
+  if (ui.emojiPicker.contains(e.target) || ui.emoji.contains(e.target)) return
+  closeEmojiPicker()
+})
+
+function openEmojiPicker() {
+  if (ui.input.disabled) return
+  emojiPickerOpen = true
+  ui.emojiPicker.hidden = false
+}
+function closeEmojiPicker() {
+  emojiPickerOpen = false
+  ui.emojiPicker.hidden = true
 }
 
 function buildEmojiPicker() {
@@ -432,58 +526,10 @@ function buildEmojiPicker() {
       ui.input.focus()
       const pos = start + emoji.length
       ui.input.setSelectionRange(pos, pos)
-      // stays open on purpose
     })
     ui.emojiGrid.append(btn)
   }
 }
-
-function openEmojiPicker() {
-  if (ui.input.disabled) return
-  emojiPickerOpen = true
-  ui.emojiPicker.hidden = false
-}
-
-function closeEmojiPicker() {
-  emojiPickerOpen = false
-  ui.emojiPicker.hidden = true
-}
-
-ui.form.addEventListener('submit', e => {
-  e.preventDefault()
-  sendMessage(ui.input.value)
-  ui.input.value = ''
-  closeEmojiPicker()
-})
-
-ui.nameButton.addEventListener('click', openNameDialog)
-ui.reconnect.addEventListener('click', openConnection)
-
-ui.nameForm.addEventListener('submit', e => {
-  e.preventDefault()
-  displayName = cleanName(ui.nameInput.value)
-  if (displayName.length < 2) return
-  localStorage.setItem('bunny_rtc_name', displayName)
-  ui.dialog.close()
-  ui.name.textContent = displayName
-  ui.avatar.textContent = [...displayName][0].toUpperCase()
-  publish(`${PRESENCE_TOPIC}${selfId}`, { id: selfId, name: displayName, at: Date.now() }, true)
-  updateOnlineCount()
-})
-
-ui.cancelName.addEventListener('click', () => ui.dialog.close())
-
-ui.emoji.addEventListener('click', e => {
-  e.stopPropagation()
-  if (emojiPickerOpen) closeEmojiPicker()
-  else openEmojiPicker()
-})
-
-document.addEventListener('click', e => {
-  if (!emojiPickerOpen) return
-  if (ui.emojiPicker.contains(e.target) || ui.emoji.contains(e.target)) return
-  closeEmojiPicker()
-})
 
 ui.invite.addEventListener('click', async () => {
   try {
@@ -500,7 +546,7 @@ if (!displayName) {
   localStorage.setItem('bunny_rtc_name', displayName)
 }
 ui.name.textContent = displayName
-ui.avatar.textContent = [...displayName][0].toUpperCase()
+renderAvatar(ui.avatar, selfId, selfAvatar)
 updateOnlineCount()
 buildEmojiPicker()
 openConnection()
